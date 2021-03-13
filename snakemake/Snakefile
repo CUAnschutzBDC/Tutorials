@@ -1,4 +1,7 @@
-output:
-    "results/first_file.txt"
-shell:
-    echo "this is a file" > {output}
+rule make_file:
+    output:
+        "results/first_file.txt"
+    shell:
+        """
+        echo "this is a file" > {output}
+        """
