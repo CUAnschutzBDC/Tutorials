@@ -1,0 +1,17 @@
+rule make_file_general:
+    output:
+        "results/{sample}_first_file.txt"
+    shell:
+        """
+        echo {wildcards.sample} > {output}
+        """
+
+rule make_second_file:
+    input:
+        "results/{sample}_first_file.txt"
+    output:
+        "results/{sample}_second_file.txt"
+    shell:
+        """
+        echo {wildcards.sample} > {output}
+        """

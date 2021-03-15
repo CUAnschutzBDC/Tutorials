@@ -1,0 +1,428 @@
+---
+title: "Snakemake tutorial"
+author: "Kristen Wells"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    highlight: "tango"
+    df_print: "paged"
+    self_contained: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = F,
+  echo = T
+)
+```
+
+Snakemake is a "tool to create reproducible and scalable data analysis". Snakemake is written in python and can be easily used on different servers and in different envrionments. I like it because it allows me to be confident that I am doing the exact same analysis on all samples and I can run through all steps of the analysis with one single submission script. It is also very easy to update between projects and you often need to edit just one configuration file.
+
+## Installation
+
+The recommendation is to install snakemake with conda. I've always just directly installed with conda
+
+```{bash}
+$ conda install -c bioconda -c conda-forge snakemake
+``` 
+
+Personally, I like to put conda into it's own environment so I run
+
+```{bash}
+$ conda create -n snakemake
+$ conda activate snakemake
+$ conda install -c bioconda -c conda-forge snakemake
+```
+
+If you do it this way, you will need to activate snakemake before running snakemake or submitting a script that runs snakemake.
+
+```{bash}
+$ conda activate snakemake
+```
+
+But the website actually recommends an additional step
+
+```{bash}
+$ conda install -c conda-forge mamba
+$ mamba create -c conda-forge -c bioconda -n snakemake snakemake
+```
+
+Like my prefered method, this creates an environment for snakemake and you will need to activate the environment before running anything with snakemake
+
+## Basic usage
+To use snakemake you write "rules". These rules are individual steps of your analysis pipeline. For example for my RNA-seq analysis, I have a rule to run fastqc, a rule to make a summary of fastqc output, a rule to run star, a rule to make a summary of star output, a rule to run featureCounts, and a rule to make a count table. But let's start with a simple rule.
+
+All snakemake pipelines need a file called the "Snakefile" *This is not 100% necessary, but if you don't call it Snakefile you must put the name of your snakefile into the command when calling snakemake*. This Snakefile contains all of the code and rules necessary to run your pipeline. There are two options for how to write your rules.
+
+1. You can write all of your rules directly into your Snakefile. This is the way I did it in grad school so you can see this option on my github.
+2. You can make scripts for sets of rules (like run fastqc and write a summary) and link to them from the snakefile. I personally like this option because it makes your code much more readable. If someone wants to know how you aligned your reads, they can just look at the alignment file rather than searching through all of your rules. It also makes it easier to share rules between pipelines. For example, you are working with a sample that has both mouse and human sequences so you need to change your alignment step, you can keep the fastqc, adapter trimming, and counting rules and just write a new alignment rule. If you choose this method, you need to link to the files from your Snakefile. 
+
+```{python}
+include: "src/rules/rule_set.snake"
+```
+
+Snakemake recommends a very specific orginazitional strategy that I like, but you don't need to follow. They recommend the scripts go into a directory named `src` and rules go into a directory named `src/rules`. Analysis scripts can also go into the `src` directory. For reasons we can discuss later I put them here: `src/rules/scripts/`. If you chose to have rule files, they have the `.snake` extension.
+
+### How to write a rule
+Let's make a rule that will write the name of a sample to a file. To write the first rule, you need the following structure
+
+```{python}
+rule make_file:
+    output:
+        "results/first_file.txt"
+    shell:
+        """
+        echo "this is a file" > {output}
+        """
+```
+
+A few things to notice. 
+
+1. You always need to name your rules (and the names need to be unique). 
+2. You always need to have an output argument
+3. You can run shell commands with the shell argument. If you run a shell command you need the three """ at the start and end of the command
+4. You can directly call the output file without needing to 
+
+We can now test what will happen by running this rule using the -np flag
+* -n means "dry-run", don't execute
+* -p prints out the shell commands that will be excuted
+
+```{bash}
+$ snakemake -np results/first_file.txt
+```
+
+```
+Building DAG of jobs...
+Job counts:
+    count   jobs
+    1   make_file
+    1
+
+[Mon Mar 15 14:39:29 2021]
+rule make_file:
+    output: results/first_file.txt
+    jobid: 0
+
+
+        echo "this is a file" > results/first_file.txt
+
+Job counts:
+    count   jobs
+    1   make_file
+    1
+This was a dry-run (flag -n). The order of jobs does not reflect the order of execution.
+```
+
+Here we told snakemake what command to run by putting the path to the `output` file, here that was `results/first_file.txt`. Notice that it tells you both the name of the job it will run and the command it will run. At the end it also tells you "job counts" which is an overview of all the jobs that will be run. 
+
+To actually run this, we can run
+```{bash}
+$ snakemake results/first_file.txt --cores 1
+```
+
+```
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+    count   jobs
+    1   make_file
+    1
+Select jobs to execute...
+
+[Mon Mar 15 14:48:16 2021]
+rule make_file:
+    output: results/first_file.txt
+    jobid: 0
+
+[Mon Mar 15 14:48:16 2021]
+Finished job 0.
+1 of 1 steps (100%) done
+Complete log: /beevol/home/wellskri/Analysis/Tutorials/snakemake/.snakemake/log/2021-03-15T144815.335079.snakemake.log
+```
+
+This gives you the output of the job. If the job runs successfully, it will tell you the job completed successfully. It also tells you the path to the log file that saved this output. The log files are in hidden directories.
+
+To see the output
+```{bash}
+$ cd results
+$ ls
+```
+
+```
+first_file.txt
+```
+
+```{bash}
+$ cd ../
+```
+
+One more important point, I didn't have to create a results directory. Snakemake will create output directories for you as long as the directory is part of the path in your `output` argument.
+
+### Generalizing a rule
+In addition to writing a rule for one specific file, we can also make rules more general by using something called `wildcards`. One of the most common ways I use wildcards is to make a rule general to any samples, but there are other uses too.
+
+```{python}
+rule make_file_general:
+    output:
+        "results/{sample}_first_file.txt"
+    shell:
+        """
+        echo {wildcards.sample} > {output}
+        """
+```
+
+Notice that you can use a wildcard in the name of the output file and you can call the wildcard as a variable in the shell command.
+
+We can again run a dry test of this
+
+```{bash}
+$ snakemake -np results/sample_1_first_file.txt
+```
+
+```
+Building DAG of jobs...
+Job counts:
+    count   jobs
+    1   make_file_general
+    1
+
+[Mon Mar 15 14:47:04 2021]
+rule make_file_general:
+    output: results/sample_1_first_file.txt
+    jobid: 0
+    wildcards: sample=sample_1
+
+
+        echo sample_1 > results/sample_1_first_file.txt
+
+Job counts:
+    count   jobs
+    1   make_file_general
+    1
+This was a dry-run (flag -n). The order of jobs does not reflect the order of execution.
+```
+
+Again, it tells us what will be done. Here you can see that the job name is different than the pevious job, that was "make_file" while this is "make_file_general".
+
+Again, we can run it
+```{bash}
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+    count   jobs
+    1   make_file_general
+    1
+Select jobs to execute...
+
+[Mon Mar 15 14:52:18 2021]
+rule make_file_general:
+    output: results/sample_1_first_file.txt
+    jobid: 0
+    wildcards: sample=sample_1
+
+[Mon Mar 15 14:52:18 2021]
+Finished job 0.
+1 of 1 steps (100%) done
+Complete log: /beevol/home/wellskri/Analysis/Tutorials/snakemake/.snakemake/log/2021-03-15T145218.383705.snakemake.log
+```
+
+To see the output
+```{bash}
+$ cd results
+$ ls
+```
+
+```
+first_file.txt  sample_1_first_file.txt
+```
+
+Now we can see both files present.
+
+If the file has already been created, snakemake will not run the rule again
+
+```{bash}
+$ snakemake results/sample_1_first_file.txt --cores 1
+```
+
+```
+Building DAG of jobs...
+Nothing to be done.
+Complete log: /beevol/home/wellskri/Analysis/Tutorials/snakemake/.snakemake/log/2021-03-15T150541.044925.snakemake.log
+```
+
+### Creating multiple rules
+One of the powers of snakemake is that multiple rules can be strung together. Here, the output file for one rule becomes the input file for another rule. Before running the second rule, Snakemake will first check that the input file exists. If it doesn't, it will create the input file by running the first rule.
+
+Let's look at an example using our first rule
+
+```{python}
+rule make_file_general:
+    output:
+        "results/{sample}_first_file.txt"
+    shell:
+        """
+        echo {wildcards.sample} > {output}
+        """
+
+rule make_second_file:
+    input:
+        "results/{sample}_first_file.txt"
+    output:
+        "results/{sample}_second_file.txt"
+    shell:
+        """
+        echo {wildcards.sample} > {output}
+        """
+```
+
+Here we now have an input file. Just like with the output, we can include wildcards with the input file. Make sure the same wildcard is used in both the input and output files (there are some exceptions that we will get to later).
+
+If snakemake can't locate the input file, it will look to see if any other rules will generate that input file. If it can't find any rules to generate that file, it will throw and error.
+
+```
+MissingInputException in line 18 of /beevol/home/wellskri/Analysis/Tutorials/snakemake/Snakefile:
+Missing input files for rule make_second_file:
+results/sample_1_first_file1.txt
+```
+
+If you see an error like this, make sure that you have a rule with an output file that is identical to the input file.
+
+To test this rule we can run
+```{bash}
+$ snakemake -np results/sample_1_second_file.txt
+```
+
+```
+Building DAG of jobs...
+Job counts:
+    count   jobs
+    1   make_second_file
+    1
+
+[Mon Mar 15 15:06:45 2021]
+rule make_second_file:
+    input: results/sample_1_first_file.txt
+    output: results/sample_1_second_file.txt
+    jobid: 0
+    wildcards: sample=sample_1
+
+
+        echo sample_1 > results/sample_1_second_file.txt
+
+Job counts:
+    count   jobs
+    1   make_second_file
+    1
+This was a dry-run (flag -n). The order of jobs does not reflect the order of execution.
+```
+
+Here you can see that only the second rule will be run. But a great thing about snakemake is it will run everything by checking that the input files exist. To show how this works, I will delete my results folder
+
+```{bash}
+$ rm -r results
+$ snakemake -np results/sample_1_second_file.txt
+```
+
+```
+Building DAG of jobs...
+Job counts:
+    count   jobs
+    1   make_file_general
+    1   make_second_file
+    2
+
+[Mon Mar 15 15:03:38 2021]
+rule make_file_general:
+    output: results/sample_1_first_file.txt
+    jobid: 1
+    wildcards: sample=sample_1
+
+
+        echo sample_1 > results/sample_1_first_file.txt
+
+
+[Mon Mar 15 15:03:38 2021]
+rule make_second_file:
+    input: results/sample_1_first_file.txt
+    output: results/sample_1_second_file.txt
+    jobid: 0
+    wildcards: sample=sample_1
+
+
+        echo sample_1 > results/sample_1_second_file.txt
+
+Job counts:
+    count   jobs
+    1   make_file_general
+    1   make_second_file
+    2
+This was a dry-run (flag -n). The order of jobs does not reflect the order of execution.
+```
+
+Now you can see that even though we only referred to the second file, snakemake will run both rules. 
+
+Again to run it
+```{bash}
+$ snakemake results/sample_1_second_file.txt --cores 1
+```
+
+```
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+    count   jobs
+    1   make_second_file
+    1
+Select jobs to execute...
+
+[Mon Mar 15 15:08:46 2021]
+rule make_second_file:
+    input: results/sample_1_first_file.txt
+    output: results/sample_1_second_file.txt
+    jobid: 0
+    wildcards: sample=sample_1
+
+[Mon Mar 15 15:08:46 2021]
+Finished job 0.
+1 of 1 steps (100%) done
+Complete log: /beevol/home/wellskri/Analysis/Tutorials/snakemake/.snakemake/log/2021-03-15T150846.110197.snakemake.log
+```
+
+We can check the output
+```{bash}
+$ cd results
+$ ls
+```
+
+```
+sample_1_first_file.txt  sample_1_second_file.txt
+```
+
+### Running multiple samples
+Snakemake can also help us combine multiple samples and run them at the same time. 
+
+Start by saying that you want to run several samples and then combine them (like into one count file)... write this into a rule. OR you can use something called `rule_all`
+
+How to run the rule for multiple samples (from the snake file)
+
+Rule all
+
+Adding parameters
+
+Adding a log file
+
+## The config file
+
+Reading from the config file into the snake file
+
+## Running jobs on the server
+Submitting the snakefile
+
