@@ -1,0 +1,11 @@
+rule params_example:
+    input: "results/{sample}_fourth_file.txt"
+    output: "results/{sample}_params_ex.txt"
+    params:
+        file_text = "this is file text",
+        other_file = "/beevol/home/wellskri/Analysis/Tutorials/snakemake/results/combined_file.txt"
+    shell:
+        """
+        cp {params.other_file} {output}
+        echo {params.file_text} >> {output}
+        """

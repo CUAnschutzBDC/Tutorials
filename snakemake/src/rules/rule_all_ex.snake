@@ -1,0 +1,7 @@
+rule four:
+    input: "results/{sample}_second_file.txt"
+    output: "results/{sample}_fourth_file.txt"
+    shell:
+        """
+        echo {wildcards.sample} > {output}
+        """

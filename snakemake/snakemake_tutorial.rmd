@@ -20,6 +20,12 @@ knitr::opts_chunk$set(
 
 Snakemake is a "tool to create reproducible and scalable data analysis". Snakemake is written in python and can be easily used on different servers and in different envrionments. I like it because it allows me to be confident that I am doing the exact same analysis on all samples and I can run through all steps of the analysis with one single submission script. It is also very easy to update between projects and you often need to edit just one configuration file.
 
+## Quick tips
+* I always do a dry run first. This way if there are any errors you can quickly see those and fix them.
+* Use `expand` to analyze multiple samples without needing to type out all the output files individually.
+* Use `rule all` as a driver of all output files you want generated.
+* Use `params` to pass arguments you don't want to hard code
+
 ## Installation
 
 The recommendation is to install snakemake with conda. I've always just directly installed with conda
@@ -83,7 +89,8 @@ A few things to notice.
 1. You always need to name your rules (and the names need to be unique). 
 2. You always need to have an output argument
 3. You can run shell commands with the shell argument. If you run a shell command you need the three """ at the start and end of the command
-4. You can directly call the output file without needing to 
+4. You can directly call the output file without needing to type the path again.
+5. Any shell command (or set of commands) can work. As long as all of your commands are within the """, you can run as complex of a shell script as you want here.
 
 We can now test what will happen by running this rule using the -np flag
 * -n means "dry-run", don't execute
@@ -407,21 +414,313 @@ sample_1_first_file.txt  sample_1_second_file.txt
 ```
 
 ### Running multiple samples
-Snakemake can also help us combine multiple samples and run them at the same time. 
+Snakemake can also help us combine multiple samples and run them at the same time. For example, you can be running an analysis and the last step is to create a combined summary of all the runs. For this, you could create a rule where the input file is the final output from each individual sample. To create this rule you could either list all the expected output samples
 
-Start by saying that you want to run several samples and then combine them (like into one count file)... write this into a rule. OR you can use something called `rule_all`
+```{python}
+rule combine_samples:
+    input:
+        "results/sample_1_second_file.txt",
+        "results/sample_2_second_file.txt",
+        "results/sample_3_second_file.txt"
 
-How to run the rule for multiple samples (from the snake file)
+```
 
-Rule all
+But this isn't very flexible if you add a new sample or if you want to copy to a new analysis. It also becomes tiring if you want to do this for many samples. Another option is to use `expand`. To use `expand`, first include a list of samples in your snakefile (later we will put these into a `configfile`)
 
-Adding parameters
+First we add a list to the snakefile
+```{python}
+samples=["sample_1", "sample_2", "sample_3", "sample_4"]
+```
 
-Adding a log file
+Then we can write our rule
+```{python}
+rule combine_samples:
+    input:
+        expand(
+            "results/{sample}_second_file.txt",
+            sample = samples
+        )
+    output:
+        "results/combined_file.txt"
+    shell:
+        """
+        cat {input} > {output}
+        """
+```
+
+In this rule we use something called `expand`. This basically will return a list replacing the wildcards with the samples in your list:
+
+```
+("results/sample_1_second_file", "results/sample_2_second_file",
+"results/sample_3_second_file", "results/sample_4_second_file")
+```
+
+If you use two wildcards with expand, it will return all pairwise options:
+```{python}
+samples = ["sample_1", "sample_2"]
+types = ["file", "matrix"]
+expand("results/{sample}_second_{type}", sample = samples, type = types)
+```
+
+gives
+
+```
+("results/sample_1_second_file", "results/sample_1_second_matrix",
+"results/sample_2_second_file", "results/sample_2_second_matrix")
+```
+
+And do a test run again
+```{bash}
+$ snakemake -np results/combined_file.txt
+```
+
+```
+Building DAG of jobs...
+Job counts:
+    count   jobs
+    1   combine_samples
+    3   make_file_general
+    3   make_second_file
+    7
+
+[Mon Mar 15 16:28:12 2021]
+rule make_file_general:
+    output: results/sample_3_first_file.txt
+    jobid: 6
+    wildcards: sample=sample_3
+
+
+        echo sample_3 > results/sample_3_first_file.txt
+
+
+[Mon Mar 15 16:28:12 2021]
+rule make_file_general:
+    output: results/sample_4_first_file.txt
+    jobid: 8
+    wildcards: sample=sample_4
+
+
+        echo sample_4 > results/sample_4_first_file.txt
+...
+```
+
+
+I'm not going to paste the entire output of this command, we can see it when we run it, but a few things I want to draw your attention to. First, look at the job counts table. This shows that 3 separate rules will be run: `combine_samples`, `make_file_general`, and `make_second_file`. Second, look at the count column, this shows that `combine_samples` will be run once, `make_file_general` and `make_second_file` will be run 3 times. This is because we need to run the first two rules for samples 2-4 (we already ran these rules for sample 1). Here you can also see that it is taking the sample names from our list and using them as the sample `wildcards`. 
+
+We can again run this
+
+```{bash}
+$ snakemake --cores 1 results/combined_file.txt
+$ cd results
+$ more combined_file.txt
+```
+
+```
+sample_1
+sample_2
+sample_3
+sample_4
+```
+
+Here we see the output of each individual sample file combined into one file.
+
+### Rule all
+Another way to run many samples is by using the `rule all`. `rule all` only takes an input argument and no other arguments.
+
+Here is an example
+
+```{python}
+rule four:
+    input: "results/{sample}_second_file.txt"
+    output: "results/{sample}_fourth_file.txt"
+    shell:
+        """
+        echo {wildcards.sample} > {output}
+        """
+
+rule all:
+    input:
+        expand(
+            "results/{sample}_fourth_file.txt",
+            sample = samples
+        )
+```
+
+And again we can run it with a dry run first
+```{bash}
+$ snakemake -np
+```
+
+```
+Building DAG of jobs...
+Job counts:
+    count   jobs
+    1   all
+    4   four
+    5
+
+[Mon Mar 15 17:56:10 2021]
+rule four:
+    input: results/sample_3_second_file.txt
+    output: results/sample_3_fourth_file.txt
+    jobid: 7
+    wildcards: sample=sample_3
+
+
+        echo sample_3 > results/sample_3_fourth_file.txt
+
+
+[Mon Mar 15 17:56:10 2021]
+rule four:
+    input: results/sample_4_second_file.txt
+    output: results/sample_4_fourth_file.txt
+    jobid: 10
+    wildcards: sample=sample_4
+
+
+        echo sample_4 > results/sample_4_fourth_file.txt
+
+...
+```
+
+There are a couple of things I want to draw attention to here.
+
+1. When you use `rule all` you don't need to specify an output file when calling snakemake. It will look at the output files in `rule all` and generate those
+2. One of the jobs listed is `all`. This isn't really going to do anything, but the rule exists to tell snakemake what output files you want to generate.
+3. Again here you can see that rule four is being run for all of our samples because we said that we wanted all of our samples run through that rule.
+4. We don't generate an extra output file that combines all the outputs from `rule four`, instead we just say we want these files as an output.
+
+
+`rule all` can be used to walk though your entire pipeline. Let's say here you want `rule four` run on individual samples (but don't plan on combining) and you want `rule combine` run as well. You can add the output from `rule combine` to your `rule all` as well. You can add as many inputs to `rule all` as you want. To add multiple inputs, just separate them by a comma
+
+```{python}
+rule all:
+    input:
+        # Create the fourth file for all samples
+        expand(
+            "results/{sample}_fourth_file.txt",
+            sample = samples
+        ),
+        # Create the combined file from file two
+        "results/combined_file.txt"
+```
+
+As you can see, here we are mixing input files with and without `expand`.
+
+I like to put `rule all` in the main snakefile. I also add lots of comments explaining what files are generated. This just helps others work their way through your code. 
+
+We can now run rule all
+
+```{bash}
+$ snakemake --cores 1
+```
+
+```
+...
+
+[Mon Mar 15 18:44:19 2021]
+localrule all:
+    input: results/sample_1_fourth_file.txt, results/sample_2_fourth_file.txt, results/sample_3_fourth_file.txt, results/sample_4_fourth_file.txt, results/combined_file.txt
+    jobid: 0
+
+...
+```
+
+You can see that now rule all is generating all the output files we want.
+
+### Adding parameters
+In addition to having `input`, `output`, and `shell` in your rules you can add extra parameters with a `params` argument. You can then refer to specific paramaters in the shell command wih {params.param_name}
+
+```{python}
+rule params_example:
+    input: "results/{sample}_fourth_file.txt"
+    output: "results/{sample}_params_ex.txt"
+    params:
+        file_text = "this is file text",
+        other_file = "/beevol/home/wellskri/Analysis/Tutorials/snakemake/results/combined_file.txt"
+    shell:
+        """
+        cp {params.other_file} {output}
+        echo params.file_text >> {output}
+        """
+```
+
+Let's add this to rule all and run it
+
+```{python}
+rule all:
+    input:
+        # Create the fourth file for all samples
+        expand(
+            "results/{sample}_fourth_file.txt",
+            sample = samples
+        ),
+        # Create the combined file from file two
+        "results/combined_file.txt",
+        # Create a file using params
+        expand(
+            "results/{sample}_params_ex.txt",
+            sample = samples
+            )
+```
+
+Testing it
+
+```{bash}
+$ snakemake -np
+```
+
+```
+Building DAG of jobs...
+Job counts:
+    count   jobs
+    1   all
+    4   params_example
+    5
+
+[Mon Mar 15 18:49:05 2021]
+rule params_example:
+    input: results/sample_3_fourth_file.txt
+    output: results/sample_3_params_ex.txt
+    jobid: 16
+    wildcards: sample=sample_3
+
+
+        cp /beevol/home/wellskri/Analysis/Tutorials/snakemake/results/combined_file.txt results/sample_3_params_ex.txt
+        echo this is file text >> results/sample_3_params_ex.txt
+```
+
+Here you can see that it has replaced the {params.name} with the data contained by the parameter data.
+
+Now to run it and check the output
+```{bash}
+$ snakemake --cores 1
+$ cd results
+$ more sample_1_params_ex.txt
+```
+
+```
+sample_1
+sample_2
+sample_3
+sample_4
+this is file text
+```
+
+While the params argument is a bit silly here, I often use it to pass arguments like the gtf file or other alignment parameters I want more control over and don't want to hard code into the alignment command.
+
+### Adding a log file
 
 ## The config file
 
 Reading from the config file into the snake file
+
+## More complicated rules
+### Python code as the rule
+
+### Running a script as the rule
+
+### Using a function for input (or paramaters)
 
 ## Running jobs on the server
 Submitting the snakefile

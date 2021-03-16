@@ -15,3 +15,16 @@ rule make_second_file:
         """
         echo {wildcards.sample} > {output}
         """
+
+rule combine_samples:
+    input:
+        expand(
+            "results/{sample}_second_file.txt",
+            sample = samples
+        )
+    output:
+        "results/combined_file.txt"
+    shell:
+        """
+        cat {input} > {output}
+        """
