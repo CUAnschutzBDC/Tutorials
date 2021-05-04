@@ -72,6 +72,7 @@ include: "src/rules/rule_set.snake"
 Snakemake recommends a very specific orginazitional strategy that I like, but you don't need to follow. They recommend the scripts go into a directory named `src` and rules go into a directory named `src/rules`. Analysis scripts can also go into the `src` directory. For reasons we can discuss later I put them here: `src/rules/scripts/`. If you chose to have rule files, they have the `.snake` extension.
 
 ### How to write a rule
+*This corresponds to the rule `first_rule.snake`*
 Let's make a rule that will write the name of a sample to a file. To write the first rule, you need the following structure
 
 ```{python}
@@ -170,6 +171,7 @@ $ cd ../
 One more important point, I didn't have to create a results directory. Snakemake will create output directories for you as long as the directory is part of the path in your `output` argument.
 
 ### Generalizing a rule
+*This corresponds to the rule `general_rule.snake`*
 In addition to writing a rule for one specific file, we can also make rules more general by using something called `wildcards`. One of the most common ways I use wildcards is to make a rule general to any samples, but there are other uses too.
 
 ```{python}
@@ -264,6 +266,7 @@ Complete log: /beevol/home/wellskri/Analysis/Tutorials/snakemake/.snakemake/log/
 ```
 
 ### Creating multiple rules
+*This corresponds to the rule `general_rule.snake`*
 One of the powers of snakemake is that multiple rules can be strung together. Here, the output file for one rule becomes the input file for another rule. Before running the second rule, Snakemake will first check that the input file exists. If it doesn't, it will create the input file by running the first rule.
 
 Let's look at an example using our first rule
@@ -414,6 +417,7 @@ sample_1_first_file.txt  sample_1_second_file.txt
 ```
 
 ### Running multiple samples
+*This corresponds to the rule `general_rule.snake`*
 Snakemake can also help us combine multiple samples and run them at the same time. For example, you can be running an analysis and the last step is to create a combined summary of all the runs. For this, you could create a rule where the input file is the final output from each individual sample. To create this rule you could either list all the expected output samples
 
 ```{python}
@@ -525,6 +529,7 @@ sample_4
 Here we see the output of each individual sample file combined into one file.
 
 ### Rule all
+*This corresponds to the rule `rule_all_ex.snake`*
 Another way to run many samples is by using the `rule all`. `rule all` only takes an input argument and no other arguments.
 
 Here is an example
@@ -629,6 +634,7 @@ localrule all:
 You can see that now rule all is generating all the output files we want.
 
 ### Adding parameters
+*This corresponds to the rule `rule_params.snake`*
 In addition to having `input`, `output`, and `shell` in your rules you can add extra parameters with a `params` argument. You can then refer to specific paramaters in the shell command wih {params.param_name}
 
 ```{python}
@@ -707,11 +713,27 @@ sample_4
 this is file text
 ```
 
-While the params argument is a bit silly here, I often use it to pass arguments like the gtf file or other alignment parameters I want more control over and don't want to hard code into the alignment command.
+While the params argument is a bit silly in this example, I often use it to pass arguments like the gtf file or other alignment parameters I want more control over and don't want to hard code into the alignment command.
 
 ### Adding a log file
-We can also add a log file
+We can also add a log file which will save all of the output and error information with the prefix that we chose. It is a simple additional argument
 
+```{python}
+rule log_example:
+    input: "results/{sample}_fourth_file.txt"
+    output: "results/{sample}_log_ex.txt"
+    log: "results/log/{sample}_log"
+    params:
+        file_text = "this is file text",
+        other_file = "/beevol/home/wellskri/Analysis/Tutorials/snakemake/results/combined_file.txt"
+    shell:
+        """
+        cp {params.other_file} {output}
+        echo {params.file_text} >> {output}
+        """
+```
+
+One thing to notice is that the log file path must contain the same wildcards as the rest of the rule.
 
 ## The config file
 

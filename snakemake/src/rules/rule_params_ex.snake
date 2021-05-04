@@ -9,3 +9,16 @@ rule params_example:
         cp {params.other_file} {output}
         echo {params.file_text} >> {output}
         """
+
+rule log_example:
+    input: "results/{sample}_fourth_file.txt"
+    output: "results/{sample}_log_ex.txt"
+    log: "results/log/{sample}_log"
+    params:
+        file_text = "this is file text",
+        other_file = "/beevol/home/wellskri/Analysis/Tutorials/snakemake/results/combined_file.txt"
+    shell:
+        """
+        cp {params.other_file} {output}
+        echo {params.file_text} >> {output}
+        """
