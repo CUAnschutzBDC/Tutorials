@@ -641,7 +641,7 @@ rule params_example:
     shell:
         """
         cp {params.other_file} {output}
-        echo params.file_text >> {output}
+        echo {params.file_text} >> {output}
         """
 ```
 
@@ -710,6 +710,8 @@ this is file text
 While the params argument is a bit silly here, I often use it to pass arguments like the gtf file or other alignment parameters I want more control over and don't want to hard code into the alignment command.
 
 ### Adding a log file
+We can also add a log file
+
 
 ## The config file
 
