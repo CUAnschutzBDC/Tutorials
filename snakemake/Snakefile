@@ -1,5 +1,11 @@
 samples=["sample_1", "sample_2", "sample_3", "sample_4"]
 
+print(config)
+
+samples_two = config["SAMPLES"]
+data_path = config["DATA_PATH"]
+groups = config["GROUPS"]
+
 rule all:
     input:
         # Create the fourth file for all samples
@@ -7,13 +13,27 @@ rule all:
             "results/{sample}_fourth_file.txt",
             sample = samples
         ),
+        
         # Create the combined file from file two
         "results/combined_file.txt",
+        
         # Create a file using params
         expand(
         	"results/{sample}_params_ex.txt",
         	sample = samples
-        	)
+        	),
+
+        # Create a log file
+        expand(
+            "results/{sample}_log_ex.txt",
+            sample = samples
+            ),
+
+        # Trying with samples from the config file
+        expand(
+            "results/{sample}_params_ex.txt",
+            sample = samples_two
+        )
 
 include: "src/rules/first_rule.snake"
 include: "src/rules/general_rule.snake"

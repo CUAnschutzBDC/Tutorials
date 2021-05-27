@@ -716,7 +716,7 @@ this is file text
 While the params argument is a bit silly in this example, I often use it to pass arguments like the gtf file or other alignment parameters I want more control over and don't want to hard code into the alignment command.
 
 ### Adding a log file
-We can also add a log file which will save all of the output and error information with the prefix that we chose. It is a simple additional argument
+We can also add a log file which will save all of the output and error information with the prefix that we chose once we submit to a cluster. It is a simple additional argument
 
 ```{python}
 rule log_example:
@@ -735,14 +735,447 @@ rule log_example:
 
 One thing to notice is that the log file path must contain the same wildcards as the rest of the rule.
 
-## The config file
+Let's add this to rule all and run it
 
-Reading from the config file into the snake file
+```{python}
+rule all:
+    input:
+        # Create the fourth file for all samples
+        expand(
+            "results/{sample}_fourth_file.txt",
+            sample = samples
+        ),
+        
+        # Create the combined file from file two
+        "results/combined_file.txt",
+        
+        # Create a file using params
+        expand(
+            "results/{sample}_params_ex.txt",
+            sample = samples
+            ),
+
+        # Create a log file
+        expand(
+            "results/{sample}_log_ex.txt",
+            sample = samples
+            )
+```
+
+Let's test running it. I always test with a dry run
+
+```{bash}
+$ snakemake -np
+```
+```
+Building DAG of jobs...
+```
+
+```{bash}
+$ snakemake --cores 1
+$ cd results/
+$ ls
+```
+```
+combined_file.txt         sample_1_params_ex.txt    sample_2_params_ex.txt    sample_3_params_ex.txt    sample_4_params_ex.txt
+log                       sample_1_second_file.txt  sample_2_second_file.txt  sample_3_second_file.txt  sample_4_second_file.txt
+sample_1_first_file.txt   sample_2_first_file.txt   sample_3_first_file.txt   sample_4_first_file.txt
+sample_1_fourth_file.txt  sample_2_fourth_file.txt  sample_3_fourth_file.txt  sample_4_fourth_file.txt
+sample_1_log_ex.txt       sample_2_log_ex.txt       sample_3_log_ex.txt       sample_4_log_ex.txt
+```
+
+A new directory has shown up called "log". Snakemake created this for us because this directory was specified under the `log:` argument. 
+
+```{bash}
+$ cd log/
+$ ls
+```
+
+```
+sample_1_log  sample_2_log  sample_3_log  sample_4_log
+```
+
+At the moment these files are empty, but this will become more helpful when we submit the job to the cluster.
+
+## The config file
+The way our pipeline is currently written, if you want to change the samples, you need to open the snakefile and find where that is defined. This can be a bit tricky, and you don't necessarily want people directly modifying the Snakemake file. A great alternative to this is the addition of a `configfile`. This is a file written in `yaml` format that can be modified by the user and then read into snakemake. The config file can contain anything you want. I most often use it for sample names and paths to files (like the genome reference for alignment). I sometimes also use it for parameters that may be changed (like the adaptor sequences for trimming).
+
+You can either include the `configfile` in the `Snakefile` or you can include it as an argument to `snakemake` (ex `--configfile config.yaml`). The benefit of the second option is if you wanted to run the same snakemake pipeline with different options to see the output. You can keep both config files and just provide the different files in arguemnts to `snakemake`.
+
+`YAML` syntax is relatively straight forward. The full document is read into `snakemake` as a dictionary. Each key in the dicitonary is defined in the following way:
+
+```{yaml}
+DATA_PATH:
+```
+
+Here, the key just needs to end with `:`.
+
+I will write a quick config file here and show you how it is interpreted by `snakemake`
+
+```{yaml}
+DATA_PATH:
+  /beevol/home/wellskri/Analysis/Tutorials/
+
+SAMPLES:
+  - sample1
+  - sample2
+  - sample3
+  - sample4
+
+GROUPS:
+  group1:
+    - sample1
+    - sample2
+  group2:
+    - sample3
+    - sample4
+```
+
+If we now update the `Snakefile` like so:
+```{python}
+print(config)
+```
+
+And run it:
+
+```{bash}
+$ snakemake -np --configfile config.yaml
+```
+
+Notice, we need to now add the `-configfile` flag
+
+We get the following output from our print function.
+```
+{'DATA_PATH': '/beevol/home/wellskri/Analysis/Tutorials/', 'SAMPLES': ['sample_5', 'sample_6', 'sample_7', 'sample_8'], 'GROUPS': OrderedDict([('group1', ['sample_5', 'sample_6']), ('group2', ['sample_7', 'sample_8'])])}
+```
+
+Notice how the `config` variable is now a dictionary with a variety of value types. We can walk through the individually.
+
+First, we have the `DATA_PATH` variable
+```{yaml}
+DATA_PATH:
+  /beevol/home/wellskri/Analysis/Tutorials/
+```
+
+Is read in `snakemake` as a string.
+
+```
+'DATA_PATH': '/beevol/home/wellskri/Analysis/Tutorials/'
+```
+
+We can pull out this string by using the normal dictionary syntax of `dictionary[key]`
+
+```{python}
+DATA_PATH = config["DATA_PATH"]
+```
+
+Next, we have the `SAMPLES` variable
+```{yaml}
+SAMPLES:
+  - sample_5
+  - sample_6
+  - sample_7
+  - sample_8
+```
+
+Is read into `snakemake` as a list.
+
+```
+'SAMPLES': ['sample_5', 'sample_6', 'sample_7', 'sample_8']
+```
+
+We can pull out this string by using the normal dictionary syntax of `dictionary[key]`
+
+```{python}
+SAMPLE_LIST = config["SAMPLES"]
+```
+
+```{yaml}
+GROUPS:
+  group1:
+    - sample_5
+    - sample_6
+  group2:
+    - sample_7
+    - sample_8
+```
+
+Is read into `snakemake` as a dictionary.
+```
+'GROUPS': OrderedDict([('group1', ['sample_5', 'sample_6']), ('group2', ['sample_7', 'sample_8'])])
+```
+
+We can pull out this string by using the normal dictionary syntax of `dictionary[key]`
+
+```{python}
+GROUPS = config["GROUPS"]
+```
+
+Let's update our Snakefile to read in all of these variables.
+
+```{python}
+SAMPLES_TWO = config["SAMPLES"]
+DATA_PATH = config["DATA_PATH"]
+GROUPS = config["GROUPS"]
+```
+
+And let's update our `rule_all` to include these new samples
+
+```{python}
+rule all:
+    input:
+        # Create the fourth file for all samples
+        expand(
+            "results/{sample}_fourth_file.txt",
+            sample = samples
+        ),
+        
+        # Create the combined file from file two
+        "results/combined_file.txt",
+        
+        # Create a file using params
+        expand(
+            "results/{sample}_params_ex.txt",
+            sample = samples
+            ),
+
+        # Create a log file
+        expand(
+            "results/{sample}_log_ex.txt",
+            sample = samples
+            ),
+
+        # Trying with samples from the config file
+        expand(
+            "results/{sample}_params_ex.txt",
+            sample = SAMPLES_TWO
+        )
+```
+
+```{bash}
+$ snakemake -np --configfile config.yaml
+```
+
+```
+Building DAG of jobs...
+Job counts:
+    count   jobs
+    1   all
+    4   four
+    4   make_file_general
+    4   make_second_file
+    4   params_example
+    17
+
+[Tue May  4 17:04:57 2021]
+rule make_file_general:
+    output: results/sample_5_first_file.txt
+    jobid: 24
+    wildcards: sample=sample_5
+
+...
+```
+
+Again, I won't show you all here, not notice that the wildcard is now `sample_5` which came from the `config.yaml` document.  Also, because I just specified `results/{sample}_params_ex.txt` Snakemake checks for each of the necessary input files and makes all files necessasry (all of them for samples 5-8)
+
+Quickly running
+
+```{bash}
+$ snakemake --configfile config.yaml --cores 1
+$ cd results/
+$ ls
+```
+
+```
+combined_file.txt         sample_2_fourth_file.txt  sample_3_second_file.txt  sample_5_params_ex.txt    sample_7_params_ex.txt
+log                       sample_2_log_ex.txt       sample_4_first_file.txt   sample_5_second_file.txt  sample_7_second_file.txt
+sample_1_first_file.txt   sample_2_params_ex.txt    sample_4_fourth_file.txt  sample_6_first_file.txt   sample_8_first_file.txt
+sample_1_fourth_file.txt  sample_2_second_file.txt  sample_4_log_ex.txt       sample_6_fourth_file.txt  sample_8_fourth_file.txt
+sample_1_log_ex.txt       sample_3_first_file.txt   sample_4_params_ex.txt    sample_6_params_ex.txt    sample_8_params_ex.txt
+sample_1_params_ex.txt    sample_3_fourth_file.txt  sample_4_second_file.txt  sample_6_second_file.txt  sample_8_second_file.txt
+sample_1_second_file.txt  sample_3_log_ex.txt       sample_5_first_file.txt   sample_7_first_file.txt
+sample_2_first_file.txt   sample_3_params_ex.txt    sample_5_fourth_file.txt  sample_7_fourth_file.txt
+```
+
+We successfully made output files for all of our samples now.
+
+Now if you wanted to change the samples, instead of changing the `Snakefile` you can just change the `config.yaml`. It is good practice to comment your `configfile` so that it is clear to someone changing it what each argument is for.
 
 ## More complicated rules
+We can add even more complexity to the rules by including more `python` (and even `R`!) 
+
 ### Python code as the rule
+Up until this point, we have included only shell scripts as the rules, but we can also write a rule that runs some python code. To do this, you just change the `shell:` argument to `run:`
+
+```{python}
+rule python_example:
+    input: "results/{sample}_params_ex.txt"
+    output:
+        python_ouput = "results/{sample}_python_code.txt",
+        shell_output = "results/{sample}_python_shell.txt"
+    params:
+        sample_list = SAMPLES_TWO
+    run:
+        # Some code
+```
+
+Now you can run any python code you want using any of the variables defined. You can easily access the variables in the python script.
+
+* To access input files
+    * By index: `input[0]` or any index that exists
+    * By name: `input.name`
+* To access output files
+    * By index: `output[0]`
+    * By name: `output.python_output`
+* To access parameters
+    * By index: `params[0]`
+    * By name: `params.sample_list`
+
+We can now use this to write a simple python script
+
+```{python}
+rule python_example:
+    input: "results/{sample}_params_ex.txt"
+    output:
+        python_ouput = "results/{sample}_python_code.txt",
+        shell_output = "results/{sample}_python_shell.txt"
+    params:
+        sample_list = SAMPLES_TWO
+    run:
+        # We can pull any data from the above, just like with shell
+        with open(output.python_ouput, "w") as out_file:
+            with open(input[0], "r") as in_file:
+                for line in in_file:
+                    out_file.write(line)
+            for sample in params.sample_list:
+                out_file.write(sample + "\n")
+
+```
+
+You can also run a shell command from your python script.
+
+```{python}
+rule python_example:
+    input: "results/{sample}_params_ex.txt"
+    output:
+        python_ouput = "results/{sample}_python_code.txt",
+        shell_output = "results/{sample}_python_shell.txt"
+    params:
+        sample_list = SAMPLES_TWO
+    run:
+        # We can pull any data from the above, just like with shell
+        with open(output.python_ouput, "w") as out_file:
+            with open(input[0], "r") as in_file:
+                for line in in_file:
+                    out_file.write(line)
+            for sample in params.sample_list:
+                out_file.write(sample + "\n")
+
+        # We can also run the shell here
+        shell(
+            """
+            cp {output.python_output} {output.shell_output}
+            """
+            )
+```
+
+This example may seem a little silly, but let's say you want the shell command to be slightly different for different circumstances (like Paired End sequencing vs Single End). You can include a T/F test as the python script and then run the shell command normally. Here's an example from one of my Snakefiles for running RNA-seq analysis.
+
+```{python}
+rule cutadapt:
+    input:
+        input_list   = _get_input,
+        fastqc_output = "{results}/fastqc_pre_trim/fastqc_{sample}_summary_untrimmed.txt"
+    output:
+        "{results}/cutadapt_trim/{sample}.txt"
+    params:
+        settings  = CMD_PARAMS["cutadapt"],
+        fastq1    = "{results}/cutadapt_trim/{sample}_R1_trimmed.fastq.gz",
+        fastq2    = "{results}/cutadapt_trim/{sample}_R2_trimmed.fastq.gz"
+    log:
+        "{results}/logs/trimming/cutadapt_{sample}"
+    message:
+        "Trimming illumina adapters for {wildcards.sample}" 
+    threads:
+        1
+    run:
+        if IS_PAIRED:
+            shell(
+                """
+                cutadapt \
+                    {params.settings} \
+                    -o {params.fastq1} \
+                    -p {params.fastq2} \
+                    {input.input_list[0]}  \
+                    {input.input_list[1]}
+                """
+            )
+        else:
+            shell(
+                """
+                cutadapt \
+                    {params.settings} \
+                    -o {output} \
+                    {input.input_list[0]} 
+                """
+            )
+        with open(output[0], "w") as out:
+            out.write("done with cutadapt trimming/n")
+```
+
+Here, the shell command is slightly different for paired end and single end. IS_PAIRED is inferred based on if two fastq files were provided for the sample so this will automatically run the correct command based on the input provided by the user.
+
+There are also a few other additions in this attached file. I've included a `message`, which is simply what will be printed to the console or the log file about what step is being completed. I've also included "settings" under `params` which links to a line in the config where `cutadapt` settings can be specified. Finally, I've included an input function which I will expalin shortly.
 
 ### Running a script as the rule
+Instead of including a `script` written under the `run` variable, we can include a full script as part of the pipeline. These scripts allow us to write a much more complicated file and include is in our pipeline.
+
+When writing a python script, you can call any snakemake parameters the same way you did in the `run` section but also including `snakemake`. For example, access input files with `snakemake.input[0]`. I like to name all variables at the top of the script. So we can write a rule as follows. Notice that we have replaced `run` with `script` and included a path to the script.
+
+```{python}
+rule python_script:
+    input: "results/{sample}_python_code.txt"
+    output:
+        python_ouput = "results/{sample}_python_script.txt"
+    params:
+        sample_list = SAMPLES_TWO
+    script:
+        "src/scripts/python_example.py"
+```
+
+```{python}
+# I first set all variables
+output_file = snakemake.output.python_output
+input_file = snakemake.input[0]
+samples = snakemake.params.sample_list
+
+with open(output_file, "w") as out_file:
+    with open(input_file, "r") as in_file:
+       for line in in_file:
+           out_file.write(line)
+        for sample in samples:
+            out_file.write(sample + "\n")
+```
+
+This doesn't only work for only python scripts, it also works for R. To access the snakemake variables in R, the syntax is slightly different.
+
+```{R}
+input_file <- snakemake@input[[1]]
+output_file <- snakemake@output[[1]]
+interesting_parameter <- snakemake@params[[1]]
+
+# The parameters can also be named
+input_matrix <- snakemake@input[["matrix"]]
+input_gtf <- snakemake@input[["gtf"]]
+```
+
+One important thing to note is that the variables are now 1 based and not 0 based.
+
+You can see an R script that I wrote to work with `Snakemake` here: https://github.com/kwells4/mtec_analysis/blob/master/scripts/figures.R
+
+The whole Snakefile is here: https://github.com/kwells4/mtec_analysis/blob/master/Snakefile
+
+*This was the first Snakefile I wrote. Feel free to go through it. It is a little more simple than the other pipelines I will share with you. It does not have separate rule files (which I've found to be helpful) and it includes a conda environment for each rule. There were many ways that the conda environments were very useful, but I won't go into it here*
 
 ### Using a function for input (or paramaters)
 
