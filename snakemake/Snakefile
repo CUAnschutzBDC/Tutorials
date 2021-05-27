@@ -2,9 +2,9 @@ samples=["sample_1", "sample_2", "sample_3", "sample_4"]
 
 print(config)
 
-samples_two = config["SAMPLES"]
-data_path = config["DATA_PATH"]
-groups = config["GROUPS"]
+SAMPLES_TWO = config["SAMPLES"]
+DATA_PATH = config["DATA_PATH"]
+GROUPS = config["GROUPS"]
 
 rule all:
     input:
@@ -32,10 +32,23 @@ rule all:
         # Trying with samples from the config file
         expand(
             "results/{sample}_params_ex.txt",
-            sample = samples_two
-        )
+            sample = SAMPLES_TWO
+        ),
+
+        # Running python code
+        expand(
+            "results/{sample}_python_code.txt",
+            sample = SAMPLES_TWO
+            ),
+
+        # Running python script
+        expand(
+            "results/{sample}_python_script.txt",
+            sample = SAMPLES_TWO
+            )
 
 include: "src/rules/first_rule.snake"
 include: "src/rules/general_rule.snake"
 include: "src/rules/rule_all_ex.snake"
 include: "src/rules/rule_params_ex.snake"
+include: "src/rules/rule_python.snake"

@@ -1,0 +1,33 @@
+# Here we can run a python script
+rule python_example:
+    input: "results/{sample}_params_ex.txt"
+    output:
+        python_output = "results/{sample}_python_code.txt",
+        shell_output = "results/{sample}_python_shell.txt"
+    params:
+        sample_list = SAMPLES_TWO
+    run:
+        # We can pull any data from the above, just like with shell
+        with open(output.python_output, "w") as out_file:
+            with open(input[0], "r") as in_file:
+                for line in in_file:
+                    out_file.write(line)
+            for sample in params.sample_list:
+                out_file.write(sample + "\n")
+
+        # We can also run the shell here
+        shell(
+            """
+            cp {output.python_output} {output.shell_output}
+            """
+            )
+
+
+rule python_script:
+    input: "results/{sample}_python_code.txt"
+    output:
+        python_output = "results/{sample}_python_script.txt"
+    params:
+        sample_list = SAMPLES_TWO
+    script:
+        "../scripts/python_example.py"

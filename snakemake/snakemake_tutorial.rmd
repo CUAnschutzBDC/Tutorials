@@ -1037,13 +1037,13 @@ We can now use this to write a simple python script
 rule python_example:
     input: "results/{sample}_params_ex.txt"
     output:
-        python_ouput = "results/{sample}_python_code.txt",
+        python_output = "results/{sample}_python_code.txt",
         shell_output = "results/{sample}_python_shell.txt"
     params:
         sample_list = SAMPLES_TWO
     run:
         # We can pull any data from the above, just like with shell
-        with open(output.python_ouput, "w") as out_file:
+        with open(output.python_output, "w") as out_file:
             with open(input[0], "r") as in_file:
                 for line in in_file:
                     out_file.write(line)
@@ -1058,13 +1058,13 @@ You can also run a shell command from your python script.
 rule python_example:
     input: "results/{sample}_params_ex.txt"
     output:
-        python_ouput = "results/{sample}_python_code.txt",
+        python_output = "results/{sample}_python_code.txt",
         shell_output = "results/{sample}_python_shell.txt"
     params:
         sample_list = SAMPLES_TWO
     run:
         # We can pull any data from the above, just like with shell
-        with open(output.python_ouput, "w") as out_file:
+        with open(output.python_output, "w") as out_file:
             with open(input[0], "r") as in_file:
                 for line in in_file:
                     out_file.write(line)
@@ -1136,12 +1136,14 @@ When writing a python script, you can call any snakemake parameters the same way
 rule python_script:
     input: "results/{sample}_python_code.txt"
     output:
-        python_ouput = "results/{sample}_python_script.txt"
+        python_output = "results/{sample}_python_script.txt"
     params:
         sample_list = SAMPLES_TWO
     script:
-        "src/scripts/python_example.py"
+        "../scripts/python_example.py"
 ```
+
+Snakemake will look for scripts based on the location of the rule file so we need to go up one directory to get to the scripts directory
 
 ```{python}
 # I first set all variables
@@ -1151,7 +1153,7 @@ samples = snakemake.params.sample_list
 
 with open(output_file, "w") as out_file:
     with open(input_file, "r") as in_file:
-       for line in in_file:
+        for line in in_file:
            out_file.write(line)
         for sample in samples:
             out_file.write(sample + "\n")
@@ -1175,7 +1177,7 @@ You can see an R script that I wrote to work with `Snakemake` here: https://gith
 
 The whole Snakefile is here: https://github.com/kwells4/mtec_analysis/blob/master/Snakefile
 
-*This was the first Snakefile I wrote. Feel free to go through it. It is a little more simple than the other pipelines I will share with you. It does not have separate rule files (which I've found to be helpful) and it includes a conda environment for each rule. There were many ways that the conda environments were very useful, but I won't go into it here*
+*This was the first Snakefile I wrote. Feel free to go through it. It is a little more simple than the other pipelines I will share with you. It does not have separate rule files (which I've found to be helpful) and it includes a conda environment for each rule. There were many ways that the conda environments were very useful, but I won't go into it here. One other important note, in the final_analysis rule I have the path to the script as a parameter, this is no longer necessary in newer versions of Snakemake, you can now include wildcards in the path to scripts*
 
 ### Using a function for input (or paramaters)
 
