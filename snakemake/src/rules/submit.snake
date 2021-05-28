@@ -1,0 +1,14 @@
+# Here we can add in the parameters to submit the rule
+rule submit_example:
+    output:
+        "results/submit_ouput/{sample}_submit.txt"
+    params:
+        sample_list = SAMPLES_TWO,
+        job_name    = "test_jobs_{sample}",
+        memory      = "select[mem>4] rusage[mem=4]"
+    threads:
+        1
+    shell:
+        """
+        echo "completed" > output
+        """

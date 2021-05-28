@@ -1,0 +1,13 @@
+def _get_input(wildcards):
+    if wildcards.run_number == "first_run":
+        return("results/" + wildcards.sample + "_python_code.txt")
+    elif wildcards.run_number == "second_run":
+        return("results/" + wildcards.sample + "_python_script.txt")
+
+rule function_example:
+    input: _get_input
+    output: "results/{run_number}/output_{sample}.txt"
+    shell:
+        """
+        echo {input} > {output}
+        """

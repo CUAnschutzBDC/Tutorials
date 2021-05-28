@@ -45,6 +45,16 @@ rule all:
         expand(
             "results/{sample}_python_script.txt",
             sample = SAMPLES_TWO
+            ),
+
+        # Test input functions
+        expand(
+            "results/{run_number}/output_{sample}.txt",
+            run_number = "first_run", sample = SAMPLES_TWO
+            ),
+        expand(
+            "results/{run_number}/output_{sample}.txt",
+            run_number = "second_run", sample = SAMPLES_TWO
             )
 
 include: "src/rules/first_rule.snake"
@@ -52,3 +62,4 @@ include: "src/rules/general_rule.snake"
 include: "src/rules/rule_all_ex.snake"
 include: "src/rules/rule_params_ex.snake"
 include: "src/rules/rule_python.snake"
+include: "src/rules/functions.snake"
