@@ -1414,7 +1414,7 @@ One important note here, there is another, more clear, way to write this particu
 ```python
 rule multi_input_example:
     input: "results/{sample}_python_{run_type}.txt"
-    output: "results/{run_number}/output_{sample}.txt"
+    output: "results/{run_type}/output_{sample}.txt"
     shell:
         """
         echo {input} > {output}
@@ -1580,7 +1580,7 @@ First, this is a normal submit script, the `#BSUB` arguments probably look famil
 Next, we set shell options, these are especially helpful for exiting if something fails and for printing errors.
 
 * -o nounset
-    * Treat unset variables and parameters other than the special parameters ‘@’ or ‘*’ as an error when performing parameter expansion. An error message will be written to the standard error, and a non-interactive shell will exit.
+    * Treat unset variables and parameters other than the special parameters `@` or `*` as an error when performing parameter expansion. An error message will be written to the standard error, and a non-interactive shell will exit.
 * -o pipefail
     * If set, the return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status, or zero if all commands in the pipeline exit successfully. This option is disabled by default.
 * -o errexit
@@ -1616,7 +1616,7 @@ When this happens, there are a few things `Snakemake` will do. It will first che
 2. Can't find input files
     * This almost always means I have a typo somewhere between `rule_all`, the rule that makes the file, or the rule(s) that use the file
 3. Output files don't exist
-    * This happens most often when I am creating a file specified in the `params` not `output` variables. If there is a new directory, it will only be created by `Snakemake` if it's specified in the `output`. If this happens and I want to keep the one output in the `params`, I can instead add a directory to the `output` params (which is easy, just do `direcotry(path/to/direcotory`)
+    * This happens most often when I am creating a file specified in the `params` not `output` variables. If there is a new directory, it will only be created by `Snakemake` if it's specified in the `output`. If this happens and I want to keep the one output in the `params`, I can instead add a directory to the `output` params (which is easy, just do `directory(path/to/directory`))
 4. The snakefile is locked.
     * Unfortunately (or fortunately), you can only run instance of `Snakemake` in a directory at one time. This is a good thing because you can't overwrite files that are in progress. If you try to do this, `Snakemake` will lock the directory. Now when you try to run  again, you will get an error that the directory is locked (even if `Snakemake` is no longer actively running). It is easy to fix though. First make sure there is no instance of `Snakemake` running (check all of your jobs and windows, my biggest problem is if one job didn't finish running and I didn't notice). Once you've checked run `Snakemake --configifile config.yam --unlock`. Now everything should work again.
 
