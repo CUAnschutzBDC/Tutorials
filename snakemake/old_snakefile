@@ -1,0 +1,67 @@
+samples=["sample_1", "sample_2", "sample_3", "sample_4"]
+
+print(config)
+
+SAMPLES_TWO = config["SAMPLES"]
+DATA_PATH = config["DATA_PATH"]
+GROUPS = config["GROUPS"]
+
+# rule all:
+#     input:
+#         # Create the fourth file for all samples
+#         expand(
+#             "results/{sample}_fourth_file.txt",
+#             sample = samples
+#         ),
+        
+#         # Create the combined file from file two
+#         "results/combined_file.txt",
+        
+#         # Create a file using params
+#         expand(
+#         	"results/{sample}_params_ex.txt",
+#         	sample = samples
+#         	),
+
+#         # Create a log file
+#         expand(
+#             "results/{sample}_log_ex.txt",
+#             sample = samples
+#             ),
+
+#         # Trying with samples from the config file
+#         expand(
+#             "results/{sample}_params_ex.txt",
+#             sample = SAMPLES_TWO
+#         ),
+
+#         # Running python code
+#         expand(
+#             "results/{sample}_python_code.txt",
+#             sample = SAMPLES_TWO
+#             ),
+
+#         # Running python script
+#         expand(
+#             "results/{sample}_python_script.txt",
+#             sample = SAMPLES_TWO
+#             ),
+
+#         # Test input functions
+#         expand(
+#             "results/{run_number}/output_{sample}.txt",
+#             run_number = "first_run", sample = SAMPLES_TWO
+#             ),
+#         expand(
+#             "results/{run_number}/output_{sample}.txt",
+#             run_number = "second_run", sample = SAMPLES_TWO
+#             )
+
+
+include: "src/rules/first_rule.snake"
+include: "src/rules/general_rule.snake"
+include: "src/rules/rule_all_ex.snake"
+include: "src/rules/rule_params_ex.snake"
+include: "src/rules/rule_python.snake"
+include: "src/rules/functions.snake"
+
