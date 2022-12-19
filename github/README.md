@@ -2,9 +2,6 @@
 
 This document walks through the steps of setting up your own github account, being added to the BDC organization, exploring the resources already part of the BDC organization, and adding your own repositories.
 
-# Quick tips
-
-[TODO]
 
 # Starting out
 * Setting up your own github
@@ -23,13 +20,11 @@ The BDC organization has it's [own page](https://github.com/CUAnschutzBDC) with 
 
 \
 \
-\
 
 Below this you see all of the repositories that you have access to in the organization
 
 ![](images/Repositories.png)
 
-\
 \
 \
 
@@ -39,13 +34,11 @@ You can also see all of the repositories by clicking the repositories tab.
 
 \
 \
-\
 
 We also have teams that are part of the BDC. This way you can choose to share your code with everyone at the BDC or with only your lab. All teams are part of the BDC large team.
 
 ![](images/Teams_tab.png)
 
-\
 \
 \
 
@@ -55,7 +48,6 @@ To view all teams assocaited with the BDC, click the "{x} teams" button
 
 \
 \
-\
 
 Within each team, you can view the repositories. To find repositories that I think are helpful to the larger BDC community, view the BDC team by clicking "All BDC" above.
 
@@ -63,13 +55,11 @@ Within each team, you can view the repositories. To find repositories that I thi
 
 \
 \
-\
 
 This page isn't very exciting at the moment, but you can click the "repositories" tab at the top to view the repositories already associated with the BDC.
 
 ![](images/BDC_team.png)
 
-\
 \
 \
 
@@ -94,7 +84,6 @@ To find the `snakemake_pipelines` repository, click the "Repositories" tab and s
 
 \
 \
-\
 
 Once here, click on the repository name to start viewing the contents. You can think of these repositories as folders. In fact, they were created from a folder, or directory, on my computer.
 
@@ -105,13 +94,11 @@ After you click on the repository name, you will see the contents of the reposit
 
 \
 \
-\
 
 There is also a place called issues. This is where people can ask questions if something isn't working. This is also where I put my to do list and issues I've been having while developing the pipeline. In analysis repositories, I also use this to take notes on what I'm observing during the analysis.
 
 ![](images/snakemake_pipelines_issues.png)
 
-\
 \
 \
 
@@ -121,13 +108,11 @@ Where you see "main" below, these are the branches. One nice thing about github 
 
 \
 \
-\
 
 Looking at the commits, you can see how many times the repository has been updated and what exactly was changed during each update.
 
 ![](images/snakemake_pipelines_commits.png)
 
-\
 \
 \
 
@@ -137,13 +122,11 @@ You can also do things like download the whole repository, get a link to clone t
 
 \
 \
-\
 
 If you scroll down, you see something called a `README`. This is a file that generally walks you through how to use the repository effectively. For example, in this `README` I walk you through what needs to be downloaded to run each of the different pipelines. This also generally includes how people want you to cite their work. Make sure if you use code from a github repository to include that in your paper and give appropraite credit.
 
 ![](images/snakemake_pipelines_readme.png)
 
-\
 \
 \
 
@@ -155,11 +138,9 @@ First, we can click on one of the folders, `scRNA_seq`. Here you see a page that
 
 \
 \
-\
 
 ![](images/src_folder.png)
 
-\
 \
 \
 
@@ -167,13 +148,11 @@ First, we can click on one of the folders, `scRNA_seq`. Here you see a page that
 
 \
 \
-\
 
 If you click on the issues, you can see issues people have brought up. I often find this particularily helpful if I run into a problem running an existing pipeline. Remember to look through both the open (issues that haven't been addressed) and the close (issues that have been addressed) when trying to solve a problem. Another important note, feel free to open your own issue when you run into a problem running someone's code or package. All code published on github will have this issues tab, definitely use it! Before submitting an issue, make sure you understand how to use markdown formatting so that your issue is easy to read.
 
 ![](images/issues.png)
 
-\
 \
 \
 
@@ -186,13 +165,11 @@ Clicking the blue number on the right side will let you see the exact changes th
 
 \
 \
-\
 
 Clicking the double arrows will let you see (and download) the repository at that point in history. This is why github has version control. If you commit wisely (and often), even if you make a change that breaks something, you can easily go back in time and redownload your script before you made the error.
 
 ![](images/commits_viewer.png)
 
-\
 \
 \
 
@@ -206,7 +183,6 @@ In your desired location on your computer. This will link to the repository dire
 
 ![](images/download.png)
 
-\
 \
 \
 
@@ -229,6 +205,41 @@ Check out some other fun repositories
 
 # Linking your directories to github
 
+## Setting up github
+
+First, configure github
+
+```bash
+git config --global  user.name "{gihub_username}"
+git config --global user.email "{your.email@cuanschutz.edu}"
+```
+
+Check that you configured it correctly with
+
+```bash
+git config -l
+```
+
+Now set up your access to github repositories.
+
+If working on a windows or mac machine, follow the instructions [here](https://github.com/GitCredentialManager/git-credential-manager/blob/release/README.md) to install the git credential manager. Once installed, when you try to run the commands below, a popup window will appear. Allow access to your github account and you should have easy access to your personal github account.
+
+If working on a linux server, follow the instructions [here](https://www.edgoad.com/2021/02/using-personal-access-tokens-with-git-and-github.html) to set up a personal access token.
+
+Once the token is set up, I recommend caching it. As described in the link run:
+
+```bash
+git config --global credential.helper cache
+```
+
+If your token has an expiration date, when it expires run:
+
+```bash
+git config --global --unset credential.helper
+```
+
+To remove the saved credentials. Once you generate a new token, you can again cache it using the step above.
+
 ## Creating a repository in github
 Once you are part of the BDC, you can create a repository in two places
 
@@ -240,12 +251,10 @@ To create a repository in your own account, first navagate to github. Click the 
 ![](images/navagate_home.png)
 \
 \
-\
 
 Your home page will look something like below. There will be information about you. You can also pin repositories that you want others to easily see. As you can see on mine, you can pin repositories from the BDC organization. There is also a link to all of your repositories and a graph showing your contribution history from the last year. I'd recommend you set this contribution history so it also shows contributions to private repositories. Many hiring teams will look at your github during the hiring process if you are applying for a bioinformatic position so it's best to keep this up to date.
 
 ![](images/kristens_homepage.png)
-\
 \
 \
 
@@ -254,12 +263,10 @@ To create a new repository, click the repositories link on the top of the page. 
 ![](images/all_repositories.png)
 \
 \
-\
 
 Once you've clicked this, you will see a form appear. First, you get to decide where you want the repository under the "Owner" option. You will likely have two possible locations, your own account or the BDC account
 
 ![](images/pick_owner.png)
-\
 \
 \
 
@@ -270,7 +277,6 @@ Once you selected the accound, you'll need to come up with a name of your reposi
 Once you've filled in all the requred information, click "Create repository".
 
 ![](images/test_repo.png)
-\
 \
 \
 
@@ -359,12 +365,10 @@ If you created the repository in the BDC organization, you can now decide if you
 ![](images/BDC_repo_access.png)
 \
 \
-\
 
 Clicking this link you will see a page to control individuals or teams that can see the repository. You can either add just your lab or the whole BDC. Again, this is easy to update at any time.
 
 ![](images/share_access.png)
-\
 \
 \
 
@@ -396,12 +400,10 @@ Let's say you have a directory that looks like the one below
 ![](images/hidden_repos.png)
 \
 \
-\
 
 Here, if we had a `.gitignore` file like above and say `git status` only `.gitignore` and `.gitattributes` are in line to be added, not `.DS_store`
 
 ![](images/hidden_status.png)
-\
 \
 \
 
@@ -423,12 +425,10 @@ So now I've made a results folder and added some things to it:
 ![](images/structure_results.png)
 \
 \
-\
 
 If we run `git status` you can see that the results folder is a tracked change that is not staged.
 
 ![](images/git_status_before.png)
-\
 \
 \
 
@@ -444,7 +444,6 @@ results
 
 And run `git status` again.
 ![](images/git_status_after.png)
-\
 \
 \
 
@@ -495,7 +494,6 @@ One great tool is to use issues. You can get to issues through the "issues" tab 
 ![](images/issues_grg.png)
 \
 \
-\
 
 You can see here that I have many issues posted. Some are tasks, like "Analysis steps" and "Use chipseeker to annotate regions". Some are notes, like "Papers of interest".
 
@@ -503,11 +501,9 @@ If you click on the analysis steps, you can see that I've taken each step and ma
 ![](images/issues_grg_analysis_steps.png)
 \
 \
-\
 
 If we look at one of these sub-issues, you can see that I've added links to tutorials that show how other people approached the question. This is a good way for me to always be able to find a tutorial, even months later.
 ![](images/issues_grg_differential_peaks.png)
-\
 \
 \
 
@@ -515,13 +511,11 @@ You can also link to specific commits (changes in code) like below. If that comm
 ![](images/issues_grg_closed_issue.png)
 \
 \
-\
 
 #### Use projects to keep track of many repositories
 
 Once you have a few repositories associated with your project, you can start organizing them in GitHub projects. This is a way to link issues from multiple repositories. You can also see what is done, what is in progress, and what you have yet to start.
 ![](images/projects.png)
-\
 \
 \
 
@@ -616,12 +610,10 @@ To move a repository, first visit the GitHub website and go to your repository p
 ![](images/transfer_repo_1.png)
 \
 \
-\
 
 
 In the window that pops up, type in `CUAnschutzBDC` to transfer the repository to the BDC.
 ![](images/transfer_repo_2.png)
-\
 \
 \
 
