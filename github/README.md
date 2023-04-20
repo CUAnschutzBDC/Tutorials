@@ -18,50 +18,40 @@ The BDC organization has it's [own page](https://github.com/CUAnschutzBDC) with 
 
 ![](images/Main_page.png)
 
-\
-\
 
 Below this you see all of the repositories that you have access to in the organization
 
 ![](images/Repositories.png)
 
-\
-\
+
 
 You can also see all of the repositories by clicking the repositories tab.
 
 ![](images/Repositories_tab.png)
 
-\
-\
 
 We also have teams that are part of the BDC. This way you can choose to share your code with everyone at the BDC or with only your lab. All teams are part of the BDC large team.
 
 ![](images/Teams_tab.png)
 
-\
-\
 
 To view all teams assocaited with the BDC, click the "{x} teams" button
 
 ![](images/All_teams.png)
 
-\
-\
+
 
 Within each team, you can view the repositories. To find repositories that I think are helpful to the larger BDC community, view the BDC team by clicking "All BDC" above.
 
 ![](images/BDC_team.png)
 
-\
-\
+
 
 This page isn't very exciting at the moment, but you can click the "repositories" tab at the top to view the repositories already associated with the BDC.
 
 ![](images/BDC_team.png)
 
-\
-\
+
 
 At the moment there are three repositories.
 
@@ -82,8 +72,7 @@ To find the `snakemake_pipelines` repository, click the "Repositories" tab and s
 
 ![](images/snakemake_pipeline_search.png)
 
-\
-\
+
 
 Once here, click on the repository name to start viewing the contents. You can think of these repositories as folders. In fact, they were created from a folder, or directory, on my computer.
 
@@ -92,43 +81,37 @@ After you click on the repository name, you will see the contents of the reposit
 
 ![](images/snakemake_pipelines_folders.jpg)
 
-\
-\
+
 
 There is also a place called issues. This is where people can ask questions if something isn't working. This is also where I put my to do list and issues I've been having while developing the pipeline. In analysis repositories, I also use this to take notes on what I'm observing during the analysis.
 
 ![](images/snakemake_pipelines_issues.png)
 
-\
-\
+
 
 Where you see "main" below, these are the branches. One nice thing about github is you can make changes to a repository you are part of but not change the main repository. This means you can start developing something new but not change the actual repository until you know it is working.
 
 ![](images/snakemake_pipelines_branches.png)
 
-\
-\
+
 
 Looking at the commits, you can see how many times the repository has been updated and what exactly was changed during each update.
 
 ![](images/snakemake_pipelines_commits.png)
 
-\
-\
+
 
 You can also do things like download the whole repository, get a link to clone the repository into your own computer, or add files using the actions at the top.
 
 ![](images/snakemake_pipelines_actions.png)
 
-\
-\
+
 
 If you scroll down, you see something called a `README`. This is a file that generally walks you through how to use the repository effectively. For example, in this `README` I walk you through what needs to be downloaded to run each of the different pipelines. This also generally includes how people want you to cite their work. Make sure if you use code from a github repository to include that in your paper and give appropraite credit.
 
 ![](images/snakemake_pipelines_readme.png)
 
-\
-\
+
 
 Let's now walk through each of these locations.
 
@@ -136,25 +119,21 @@ First, we can click on one of the folders, `scRNA_seq`. Here you see a page that
 
 ![](images/scRNA_seq.png)
 
-\
-\
+
 
 ![](images/src_folder.png)
 
-\
-\
+
 
 ![](images/scRNA_seq_readme.png)
 
-\
-\
+
 
 If you click on the issues, you can see issues people have brought up. I often find this particularily helpful if I run into a problem running an existing pipeline. Remember to look through both the open (issues that haven't been addressed) and the close (issues that have been addressed) when trying to solve a problem. Another important note, feel free to open your own issue when you run into a problem running someone's code or package. All code published on github will have this issues tab, definitely use it! Before submitting an issue, make sure you understand how to use markdown formatting so that your issue is easy to read.
 
 ![](images/issues.png)
 
-\
-\
+
 
 If you click the commits, you can see all of the changes that have been made to the repository.
 
@@ -163,15 +142,13 @@ Clicking the blue number on the right side will let you see the exact changes th
 
 ![](images/commits_changes.png)
 
-\
-\
+
 
 Clicking the double arrows will let you see (and download) the repository at that point in history. This is why github has version control. If you commit wisely (and often), even if you make a change that breaks something, you can easily go back in time and redownload your script before you made the error.
 
 ![](images/commits_viewer.png)
 
-\
-\
+
 
 If you click the "code" button, you see options for downloading the repository. You can either download a zip of the whole directory by clicking "download zip" or you can clone the repository by copying the link and then typing
 
@@ -183,8 +160,7 @@ In your desired location on your computer. This will link to the repository dire
 
 ![](images/download.png)
 
-\
-\
+
 
 
 If you do clone the repository, you will be able to see the entire folder structure on your computer.
@@ -249,26 +225,22 @@ Once you are part of the BDC, you can create a repository in two places
 To create a repository in your own account, first navagate to github. Click the upper right hand corner (where there is a picture of you or a circular image) and click "your profile" to get to your main page.
 
 ![](images/navagate_home.png)
-\
-\
+
 
 Your home page will look something like below. There will be information about you. You can also pin repositories that you want others to easily see. As you can see on mine, you can pin repositories from the BDC organization. There is also a link to all of your repositories and a graph showing your contribution history from the last year. I'd recommend you set this contribution history so it also shows contributions to private repositories. Many hiring teams will look at your github during the hiring process if you are applying for a bioinformatic position so it's best to keep this up to date.
 
 ![](images/kristens_homepage.png)
-\
-\
+
 
 To create a new repository, click the repositories link on the top of the page. This will show all of your existing repositories. Next, click the green "New" button
 
 ![](images/all_repositories.png)
-\
-\
+
 
 Once you've clicked this, you will see a form appear. First, you get to decide where you want the repository under the "Owner" option. You will likely have two possible locations, your own account or the BDC account
 
 ![](images/pick_owner.png)
-\
-\
+
 
 If you select your own account, you are the only person who will have access to this repository until you add other github members or make the repository public. If you select the BDC account, you can easily share the repository with your lab or any members of the BDC. Don't stress about this decision too much, it's very easy to transfer repositories between your personal account and the BDC account.
 
@@ -277,8 +249,7 @@ Once you selected the accound, you'll need to come up with a name of your reposi
 Once you've filled in all the requred information, click "Create repository".
 
 ![](images/test_repo.png)
-\
-\
+
 
 Once you create the repository, you will see a page with instructions for how to proceed. You can just go to your exiting folder on your computer that you want to upload and follow the commands shown on this page. Let's do this with a quick test directory.
 
@@ -363,14 +334,12 @@ This now tells github what the URL is that you want to link to. It then switches
 If you created the repository in the BDC organization, you can now decide if you want to share the repository with anyone else. A link to do this will appear at the top of the repository.
 
 ![](images/BDC_repo_access.png)
-\
-\
+
 
 Clicking this link you will see a page to control individuals or teams that can see the repository. You can either add just your lab or the whole BDC. Again, this is easy to update at any time.
 
 ![](images/share_access.png)
-\
-\
+
 
 ### Keep the repository updated
 Now that you have your repository built either in your account or the BDC account, it's important to maintain it.
@@ -398,14 +367,12 @@ Here the `.*` means to ignore all hidden files and directories. The `!` means ne
 Let's say you have a directory that looks like the one below
 
 ![](images/hidden_repos.png)
-\
-\
+
 
 Here, if we had a `.gitignore` file like above and say `git status` only `.gitignore` and `.gitattributes` are in line to be added, not `.DS_store`
 
 ![](images/hidden_status.png)
-\
-\
+
 
 The `.gitignore` can also ignore any file type using pattern matching. For example, let's say you don't want your html of markdowns, you would add `*.html` to your `.gitignore`. This means that even if the html file is in a subdirectory, it will still be ignored by `git add .`
 
@@ -423,14 +390,12 @@ But let's say that we don't want to include any of the results. It has large ima
 So now I've made a results folder and added some things to it:
 
 ![](images/structure_results.png)
-\
-\
+
 
 If we run `git status` you can see that the results folder is a tracked change that is not staged.
 
 ![](images/git_status_before.png)
-\
-\
+
 
 But we don't want the results to be added, so we update our `.gitignore` as follows
 
@@ -443,9 +408,9 @@ results
 ```
 
 And run `git status` again.
+
 ![](images/git_status_after.png)
-\
-\
+
 
 Notice that now, the results are no longer tracked so any changes to this folder will not be added to github.
 
@@ -492,32 +457,31 @@ There are several things I keep in mind while keeping everything up to date
 One great tool is to use issues. You can get to issues through the "issues" tab in a repository. Below is an image of my "issues" as part of my bulk ATAC-seq pipeline. This is a pipeline where I'm developing my own analysis through bulk ATAC-seq. This is my first time doing this analysis so I have lots of notes.
 
 ![](images/issues_grg.png)
-\
-\
+
 
 You can see here that I have many issues posted. Some are tasks, like "Analysis steps" and "Use chipseeker to annotate regions". Some are notes, like "Papers of interest".
 
 If you click on the analysis steps, you can see that I've taken each step and made it into an issue. This is because each of the steps are large and have a lot of information for me to think about.
+
 ![](images/issues_grg_analysis_steps.png)
-\
-\
+
 
 If we look at one of these sub-issues, you can see that I've added links to tutorials that show how other people approached the question. This is a good way for me to always be able to find a tutorial, even months later.
+
 ![](images/issues_grg_differential_peaks.png)
-\
-\
+
 
 You can also link to specific commits (changes in code) like below. If that commit included code that fixed the issue or finished the item on the to do list, you can close the issue and note what specific update was used to finish the task.
+
 ![](images/issues_grg_closed_issue.png)
-\
-\
+
 
 #### Use projects to keep track of many repositories
 
 Once you have a few repositories associated with your project, you can start organizing them in GitHub projects. This is a way to link issues from multiple repositories. You can also see what is done, what is in progress, and what you have yet to start.
+
 ![](images/projects.png)
-\
-\
+
 
 One aspect of projects that's especially helpful is that you can easily collaborate. For example, let's say one person in your lab is looking at ChIP-seq and ATAC-seq of a protein of interest while another person is doing RNA-seq on a KO of that same protein. You can have a joint project where you can both see what the other person is actively working on. You can also add me to your projects and we can have issues that I'm trying to solve (like why you are getting a specific error or how to do some aspect of the analysis) while also keeping track of your own progress. Above I have an example of a project where I stareted with some single cell RNA-seq. We later added bulk ATAC-seq (that I wanted to keep in it's own repository). But I could link the two repositories and remember where I am in both sides of the analysis easily using the project.
 
@@ -607,15 +571,15 @@ git pull --no-rebase origin main
 
 ## Moving repositories between the BDC and personal accounts
 To move a repository, first visit the GitHub website and go to your repository page. On the top menu, click the "Settings" tab. Scroll all the way to the bottom and click "transfer ownership"
+
 ![](images/transfer_repo_1.png)
-\
-\
+
 
 
 In the window that pops up, type in `CUAnschutzBDC` to transfer the repository to the BDC.
+
 ![](images/transfer_repo_2.png)
-\
-\
+
 
 Type in the path to the repo and click "I understand, transfer this repository".
 
