@@ -458,13 +458,17 @@ There is a great tutorial on using github with rstudio [here](https://support.po
 
 Before you get started, first set up an empty git repository as described above. Then, create a new project
 
-![](images/rstudio_project.png)
+![](images/version_control.png)
 
 Then click on *Version Control --> Git* and fill in the URL, name of the new directory and location of the new directory
 
 ![](images/git_clone_rstudio.png)
 
-Notice that you also have some new files that appeared as well as a "git" tab, including a `.gitignore` file. This file even has some hidden files already added to it. If you click the "Git" tab, you can see the files that are being tracked. To stage this files, click the box next to them. 
+Notice that you also have some new files that appeared as well as a "git" tab, including a `.gitignore` file. This file even has some hidden files already added to it.
+
+![](images/git_appears)
+
+If you click the "Git" tab, you can see the files that are being tracked. To stage this files, click the box next to them. 
 
 ![](images/stage_files.png)
 
@@ -479,18 +483,9 @@ If you want to see what changes you've made over time, click the "History" butto
 Next we can add a licence by using the templates on github. Add a license by navigating to your git repo and clicking *Add file --> Create new file* and typing `LICENSE` in the "Name of your file" box. Click the box that appears that says "Choose a license template". Chose your file and commit. Now we have a file that is on the online github but not in our local. To get this file on our local, naviage back to Rstudio and click "pull". Notice that the LICENSE now shows up.
 
 #### Starting with an existing rstudio project
-
-
 Now that you have your rproject set up, we can set up github. First we need to make sure rstudio is properly configured. For this go to *Tools --> Global Options* in the menu. Then navigate to *Git/SVN* and make sure that you have checked the box that says "Enable version control..." Also make sure that you have a path to git. If you don't, you can find it with `which git` in the terminal.
 
 ![](images/github_rstudio_setup.png)
-
-Before continuing, configure git to use your username and email. In the terminal, run the following command replacing the username and email with your username and email.
-
-```bash
-git config --global user.name yourGitHubUsername
-git config --global user.email name@provider.com
-```
 
 Now back in Rstudio, click on *Tools --> Version control --> Project setup* and change the version control system to "git"
 
