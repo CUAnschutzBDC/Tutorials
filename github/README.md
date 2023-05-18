@@ -253,6 +253,17 @@ Once you've filled in all the requred information, click "Create repository".
 
 Once you create the repository, you will see a page with instructions for how to proceed. You can just go to your exiting folder on your computer that you want to upload and follow the commands shown on this page. Let's do this with a quick test directory.
 
+**NOTE you need git installed. You can check if it is installed by running `which git` in a terminal window. If git is installed you will see a path to git. If it is not installed, follow the steps [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) to install it.**
+
+Before continuing, configure git to use your username and email. In the terminal, run the following command replacing the username and email with your username and email.
+
+```bash
+git config --global user.name yourGitHubUsername
+git config --global user.email name@provider.com
+```
+
+Once this is done, we can start working in our test directory.
+
 ```bash
 mkdir test_dir
 cd test_dir
@@ -339,6 +350,37 @@ If you created the repository in the BDC organization, you can now decide if you
 Clicking this link you will see a page to control individuals or teams that can see the repository. You can either add just your lab or the whole BDC. Again, this is easy to update at any time.
 
 ![](images/share_access.png)
+
+### Using rstudio to interact with git
+
+There is a great tutorial on using github with rstudio [here](https://www.geo.uzh.ch/microsite/reproducible_research/post/rr-rstudio-git/) but we will go through some of the basics in this tutorial as well.
+
+To use rstudio with github, first create a new project
+
+![](images/rstudio_project.png)
+
+You can create a new directory or link to an existing directory
+
+![](images/create_project.png)
+
+If linking to a new directory, put in the path to that directory
+
+![](images/linking_directory.png)
+
+Now that you have your rproject set up, we can set up github. First we need to make sure rstudio is properly configured. For this go to *Tools --> Global Options* in the menu. Then navigate to *Git/SVN* and make sure that you have checked the box that says "Enable version control..." Also make sure that you have a path to git. If you don't, you can find it with `which git` in the terminal.
+
+![](images/github_rstudio_setup.png)
+
+Before continuing, configure git to use your username and email. In the terminal, run the following command replacing the username and email with your username and email.
+
+```bash
+git config --global user.name yourGitHubUsername
+git config --global user.email name@provider.com
+```
+
+Now back in Rstudio, click on *Tools --> Version control --> Project setup* and change the version control system to "git"
+
+![](images/pick_git.png)
 
 
 ### Keep the repository updated
