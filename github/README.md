@@ -183,6 +183,8 @@ Check out some other fun repositories
 
 ## Setting up github
 
+**NOTE you need git installed. You can check if it is installed by running `which git` in a terminal window. If git is installed you will see a path to git. If it is not installed, follow the steps [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) to install it.**
+
 First, configure github
 
 ```bash
@@ -198,7 +200,7 @@ git config -l
 
 Now set up your access to github repositories.
 
-If working on a windows or mac machine, follow the instructions [here](https://github.com/GitCredentialManager/git-credential-manager/blob/release/README.md) to install the git credential manager. Once installed, when you try to run the commands below, a popup window will appear. Allow access to your github account and you should have easy access to your personal github account.
+If working on a windows or mac machine, follow the instructions [here](https://github.com/GitCredentialManager/git-credential-manager/blob/release/README.md) to install the git credential manager. Once installed, when you try to run the commands below (ie `git push`), a popup window will appear. Allow access to your github account and you should have easy access to your personal github account.
 
 If working on a linux server, follow the instructions [here](https://www.edgoad.com/2021/02/using-personal-access-tokens-with-git-and-github.html) to set up a personal access token.
 
@@ -252,15 +254,6 @@ Once you've filled in all the requred information, click "Create repository".
 
 
 Once you create the repository, you will see a page with instructions for how to proceed. You can just go to your exiting folder on your computer that you want to upload and follow the commands shown on this page. Let's do this with a quick test directory.
-
-**NOTE you need git installed. You can check if it is installed by running `which git` in a terminal window. If git is installed you will see a path to git. If it is not installed, follow the steps [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) to install it.**
-
-Before continuing, configure git to use your username and email. In the terminal, run the following command replacing the username and email with your username and email.
-
-```bash
-git config --global user.name yourGitHubUsername
-git config --global user.email name@provider.com
-```
 
 Once this is done, we can start working in our test directory.
 
@@ -350,37 +343,6 @@ If you created the repository in the BDC organization, you can now decide if you
 Clicking this link you will see a page to control individuals or teams that can see the repository. You can either add just your lab or the whole BDC. Again, this is easy to update at any time.
 
 ![](images/share_access.png)
-
-### Using rstudio to interact with git
-
-There is a great tutorial on using github with rstudio [here](https://www.geo.uzh.ch/microsite/reproducible_research/post/rr-rstudio-git/) but we will go through some of the basics in this tutorial as well.
-
-To use rstudio with github, first create a new project
-
-![](images/rstudio_project.png)
-
-You can create a new directory or link to an existing directory
-
-![](images/create_project.png)
-
-If linking to a new directory, put in the path to that directory
-
-![](images/linking_directory.png)
-
-Now that you have your rproject set up, we can set up github. First we need to make sure rstudio is properly configured. For this go to *Tools --> Global Options* in the menu. Then navigate to *Git/SVN* and make sure that you have checked the box that says "Enable version control..." Also make sure that you have a path to git. If you don't, you can find it with `which git` in the terminal.
-
-![](images/github_rstudio_setup.png)
-
-Before continuing, configure git to use your username and email. In the terminal, run the following command replacing the username and email with your username and email.
-
-```bash
-git config --global user.name yourGitHubUsername
-git config --global user.email name@provider.com
-```
-
-Now back in Rstudio, click on *Tools --> Version control --> Project setup* and change the version control system to "git"
-
-![](images/pick_git.png)
 
 
 ### Keep the repository updated
@@ -489,6 +451,65 @@ There are several things I keep in mind while keeping everything up to date
   * I do this to keep all of my code on the server and my local machine in sync
   * Pull using: `git pull --no-rebase origin main`
 * Keep notes of conclusions you make along the way. Remember you can do this using the issues associated with your repo. This means that all of your analysis and thinking will be in one place! You can also then link a specific commit to your issue so you can always find what changes you made that led you to a certain conclusion.
+
+### Using rstudio to interact with git
+
+There is a great tutorial on using github with rstudio [here](https://support.posit.co/hc/en-us/articles/200532077) but we will go through some of the basics in this tutorial as well.
+
+Before you get started, first set up an empty git repository as described above. Then, create a new project
+
+![](images/rstudio_project.png)
+
+Then click on *Version Control --> Git* and fill in the URL, name of the new directory and location of the new directory
+
+![](images/git_clone_rstudio.png)
+
+Notice that you also have some new files that appeared as well as a "git" tab, including a `.gitignore` file. This file even has some hidden files already added to it. If you click the "Git" tab, you can see the files that are being tracked. To stage this files, click the box next to them. 
+
+![](images/stage_files.png)
+
+You can then click the commit button. This will bring up a box with all files that you've staged and the changes that you have made to them. In the box, you can add a message. This is just a description of what has changed. Once you do this, click "commit"
+
+Now, you can push your changes to github. Do this by clicking the "push" button.
+
+Let's now add a README file. Do this by creating a new file and saving it as `README.md`. Again, stage, commit and push this.
+
+If you want to see what changes you've made over time, click the "History" button.
+
+Next we can add a licence by using the templates on github. Add a license by navigating to your git repo and clicking *Add file --> Create new file* and typing `LICENSE` in the "Name of your file" box. Click the box that appears that says "Choose a license template". Chose your file and commit. Now we have a file that is on the online github but not in our local. To get this file on our local, naviage back to Rstudio and click "pull". Notice that the LICENSE now shows up.
+
+#### Starting with an existing rstudio project
+
+
+Now that you have your rproject set up, we can set up github. First we need to make sure rstudio is properly configured. For this go to *Tools --> Global Options* in the menu. Then navigate to *Git/SVN* and make sure that you have checked the box that says "Enable version control..." Also make sure that you have a path to git. If you don't, you can find it with `which git` in the terminal.
+
+![](images/github_rstudio_setup.png)
+
+Before continuing, configure git to use your username and email. In the terminal, run the following command replacing the username and email with your username and email.
+
+```bash
+git config --global user.name yourGitHubUsername
+git config --global user.email name@provider.com
+```
+
+Now back in Rstudio, click on *Tools --> Version control --> Project setup* and change the version control system to "git"
+
+![](images/pick_git.png)
+
+
+Then click "Yes" when asked if you want to initialize a new git repository for this project and when it asks to restart Rstudio.
+
+Once Rstudio restarts, you will see a new tab called "Git" appear
+
+![](images/git_appears.png)
+
+I couldn't figure out how to change the origin from within github, so add in the terminal with the commands detailed above. In the main directory of your project run:
+
+```bash
+git remote add origin https://github.com/kwells4/my_test.git
+```
+
+When you restart Rstudio, you should be able to commit and push as described in the previous section.
 
 ### Other ways to use GitHub
 
