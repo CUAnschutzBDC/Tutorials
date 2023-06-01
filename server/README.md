@@ -27,7 +27,7 @@
 * Connect to the server using your username
 
 ```{bash}
-~ ssh your_username@amc-bodhi.ucdenver.pvt
+ssh your_username@amc-bodhi.ucdenver.pvt
 ```
 
 There will likely be a message about the host. Type yes
@@ -132,12 +132,12 @@ To copy files between the server and your local computer, I recommend using `rsy
 From the server to your local:
 ```{bash}
 # Run this on your local computer running bash
-~ rsync -avz --progress your_username@amc-bodhi.ucdenver.pvt:/beevol/home/your_username/path/to/data/* path/to/local/directory
+rsync -avz --progress your_username@amc-bodhi.ucdenver.pvt:/beevol/home/your_username/path/to/data/* path/to/local/directory
 ```
 
 ```{zsh}
 # Run this on your local computer running zsh, notice zsh requires ""
-~ rsync -avz --progress "your_username@amc-bodhi.ucdenver.pvt:/beevol/home/your_username/path/to/data/*"" path/to/local/directory
+rsync -avz --progress "your_username@amc-bodhi.ucdenver.pvt:/beevol/home/your_username/path/to/data/*"" path/to/local/directory
 ```
 
 Here, -a is a shortcut to many other arguments (rlptgoD no -H, -A, -X)
@@ -159,12 +159,12 @@ Here, -a is a shortcut to many other arguments (rlptgoD no -H, -A, -X)
 From your local to the server:
 ```{bash}
 # Run this on your local computer running bash
-~ rsync -avz --progress path/to/local/directory/* your_username@amc-bodhi.ucdenver.pvt:/beevol/home/your_username/path/to/directory/on/server/
+rsync -avz --progress path/to/local/directory/* your_username@amc-bodhi.ucdenver.pvt:/beevol/home/your_username/path/to/directory/on/server/
 ```
 
 ```{zsh}
 # Run this on your local computer running zsh, notice zsh requires ""
-~ rsync -avz --progress path/to/local/directory/* "your_username@amc-bodhi.ucdenver.pvt:/beevol/home/your_username/path/to/directory/on/server/"
+rsync -avz --progress path/to/local/directory/* "your_username@amc-bodhi.ucdenver.pvt:/beevol/home/your_username/path/to/directory/on/server/"
 ```
 
 ### Sshfs
@@ -185,30 +185,30 @@ That's it! You should now be able to use sshfs
 #### How do you use sshfs?
 1. Set up an empty directory to use for sshfs (full disclosure, I started doing this my first year of grad school when I was just learning and haven't looked into it seriously again because it's worked well. There may be better ways to do it). This only needs to be done once.
 ```{bash}
-~ mkdir Documents/sshfs
+mkdir Documents/sshfs
 ```
 
 2. Connect to the server
 ```{bash}
 # You can pass any folder on the server that you want
-~ sshfs your_username@amc-bodhi.ucdenver.pvt:/home/beevol/your_username Documents/sshfs
+sshfs your_username@amc-bodhi.ucdenver.pvt:/home/beevol/your_username Documents/sshfs
 ```
 
 3. Now you can view the files on the server from your local computer either using the terminal or you can even view the files in finder. This is very convienient if you have html output (like from `fastQC`) because you can now view these files without transferring to your local.
 
 4. You can edit files on the server any way you want. I personally like to use `sublime` because it has language specific highlighting
 ```{bash}
-~ sublime Documents/sshfs/my_server_file.txt
+sublime Documents/sshfs/my_server_file.txt
 ```
 
 5. Before you put your computer to sleep or log off, make sure to eject the connection. I personally go to my documents folder in finder and eject (in case there is something still running), but you can also eject from the terminal
 ```{bash}
-~ umount Documents/sshfs
+umount Documents/sshfs
 ```
 
 6. Sometimes if your connection is interrupted or your computer goes to sleep while still connected, the created `sshfs` folder may be broken. If so, first try to umount it. This almost always works. If that fails, you may want to restart your computer.
 ```{bash}
-~ umount Documents/sshfs
+umount Documents/sshfs
 ```
 
 ## Server backup
