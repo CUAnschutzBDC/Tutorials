@@ -1,4 +1,5 @@
-# How to run jobs on a server
+# How to run jobs on an LSF server
+On CUs campus, this is used for the bodhi server
 
 ## Key points
 
