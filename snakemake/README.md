@@ -68,6 +68,14 @@ A few things to notice.
 4. You can directly call the output file without needing to type the path again.
 5. Any shell command (or set of commands) can work. As long as all of your commands are within the """, you can run as complex of a shell script as you want here.
 
+Now we need to create a file called `Snakefile`. This file can be named anything you want, but if you use any name except `Snakefile`, you will need to update the command below.
+
+The snakefile will look like this
+
+```python
+include: "src/rules/first_rule.snake"
+```
+
 We can now test what will happen by running this rule using the -np flag
 * -n means "dry-run", don't execute
 * -p prints out the shell commands that will be excuted
@@ -95,6 +103,8 @@ This was a dry-run (flag -n). The order of jobs does not reflect the order of ex
 ```
 
 Here we told snakemake what command to run by putting the path to the `output` file, here that was `results/first_file.txt`. Notice that it tells you both the name of the job it will run and the command it will run. At the end it also tells you "job counts" which is an overview of all the jobs that will be run. 
+
+*NOTE if you didn't name your file `Snakefile` above, this command will be `snakemake -np --snakefile {name_of_file} results/first_file.txt` This is because snakemake expects Snakefile by default but gives the option for you to name the file in any way you want with the flag* 
 
 To actually run this, we can run
 ```bash
@@ -137,7 +147,9 @@ first_file.txt
 $ cd ../
 ```
 
-One more important point, I didn't have to create a results directory. Snakemake will create output directories for you as long as the directory is part of the path in your `output` argument.
+One more important point, I didn't have to create a results directory. `Snakemake` will create output directories for you as long as the directory is part of the path in your `output` argument.
+
+The above code uses the `snakemake` package. To see all options you can pass to `snakemake` run `snakemake --help`
 
 ### Generalizing a rule
 *This corresponds to the rule `general_rule.snake`*
@@ -155,6 +167,13 @@ rule make_file_general:
 ```
 
 Notice that you can use a wildcard in the name of the output file and you can call the wildcard as a variable in the shell command.
+
+Now we need to again update our `Snakefile`
+
+```python
+include: "src/rules/first_rule.snake"
+include: "src/rules/general_rule.snake"
+```
 
 We can again run a dry test of this
 
@@ -384,6 +403,9 @@ But this isn't very flexible if you add a new sample or if you want to copy to a
 First we add a list to the snakefile
 ```python
 samples=["sample_1", "sample_2", "sample_3", "sample_4"]
+
+include: "src/rules/first_rule.snake"
+include: "src/rules/general_rule.snake"
 ```
 
 Then we can write our rule
@@ -496,6 +518,16 @@ rule all:
         )
 ```
 
+Again, we need to add this new rule file to our `Snakefile`. Here's our full Snakefile at this point
+
+```python
+samples=["sample_1", "sample_2", "sample_3", "sample_4"]
+
+include: "src/rules/first_rule.snake"
+include: "src/rules/general_rule.snake"
+include: "src/rules/rule_all_ex.snake"
+```
+
 And again we can run it with a dry run first
 ```bash
 $ snakemake -np
@@ -551,6 +583,23 @@ As you can see, here we are mixing input files with and without `expand`.
 
 I like to put `rule all` in the main snakefile. I also add lots of comments explaining what files are generated. This just helps others work their way through your code. 
 
+Here's my `Snakefile` at this point
+
+```python
+samples=["sample_1", "sample_2", "sample_3", "sample_4"]
+
+rule all:
+    input:
+        expand(
+            "results/{sample}_fourth_file.txt",
+            sample = samples
+        )
+
+include: "src/rules/first_rule.snake"
+include: "src/rules/general_rule.snake"
+include: "src/rules/rule_all_ex.snake"
+```
+
 We can now run rule all
 
 ```bash
@@ -590,6 +639,8 @@ rule params_example:
 Let's add this to rule all and run it
 
 ```python
+samples=["sample_1", "sample_2", "sample_3", "sample_4"]
+
 rule all:
     input:
         # Create the fourth file for all samples
@@ -604,6 +655,11 @@ rule all:
             "results/{sample}_params_ex.txt",
             sample = samples
             )
+
+include: "src/rules/first_rule.snake"
+include: "src/rules/general_rule.snake"
+include: "src/rules/rule_all_ex.snake"
+include: "src/rules/rule_params_ex.snake"
 ```
 
 Testing it
@@ -671,6 +727,8 @@ One thing to notice is that the log file path must contain the same wildcards as
 Let's add this to rule all and run it
 
 ```python
+samples=["sample_1", "sample_2", "sample_3", "sample_4"]
+
 rule all:
     input:
         # Create the fourth file for all samples
@@ -692,6 +750,11 @@ rule all:
             "results/{sample}_log_ex.txt",
             sample = samples
             )
+
+include: "src/rules/first_rule.snake"
+include: "src/rules/general_rule.snake"
+include: "src/rules/rule_all_ex.snake"
+include: "src/rules/rule_params_ex.snake"
 ```
 
 Let's test running it. I always test with a dry run
@@ -764,6 +827,40 @@ GROUPS:
 If we now update the `Snakefile` like so:
 ```python
 print(config)
+```
+
+Here's the full `Snakefile`
+```python
+samples=["sample_1", "sample_2", "sample_3", "sample_4"]
+
+print(config)
+
+rule all:
+    input:
+        # Create the fourth file for all samples
+        expand(
+            "results/{sample}_fourth_file.txt",
+            sample = samples
+        ),
+        
+        # Create the combined file from file two
+        "results/combined_file.txt",
+        
+        # Create a file using params
+        expand(
+            "results/{sample}_params_ex.txt",
+            sample = samples
+            ),
+        # Create a log file
+        expand(
+            "results/{sample}_log_ex.txt",
+            sample = samples
+            )
+
+include: "src/rules/first_rule.snake"
+include: "src/rules/general_rule.snake"
+include: "src/rules/rule_all_ex.snake"
+include: "src/rules/rule_params_ex.snake"
 ```
 
 And run it:
@@ -849,6 +946,7 @@ DATA_PATH = config["DATA_PATH"]
 GROUPS = config["GROUPS"]
 ```
 
+
 And let's update our `rule_all` to include these new samples
 
 ```python
@@ -878,6 +976,48 @@ rule all:
             "results/{sample}_params_ex.txt",
             sample = SAMPLES_TWO
         )
+```
+
+Here's the full file again
+
+```python
+samples=["sample_1", "sample_2", "sample_3", "sample_4"]
+
+SAMPLES_TWO = config["SAMPLES"]
+DATA_PATH = config["DATA_PATH"]
+GROUPS = config["GROUPS"]
+
+rule all:
+    input:
+        # Create the fourth file for all samples
+        expand(
+            "results/{sample}_fourth_file.txt",
+            sample = samples
+        ),
+        
+        # Create the combined file from file two
+        "results/combined_file.txt",
+        
+        # Create a file using params
+        expand(
+            "results/{sample}_params_ex.txt",
+            sample = samples
+            ),
+        # Create a log file
+        expand(
+            "results/{sample}_log_ex.txt",
+            sample = samples
+            ),
+        # Trying with samples from the config file
+        expand(
+            "results/{sample}_params_ex.txt",
+            sample = SAMPLES_TWO
+        )
+
+include: "src/rules/first_rule.snake"
+include: "src/rules/general_rule.snake"
+include: "src/rules/rule_all_ex.snake"
+include: "src/rules/rule_params_ex.snake"
 ```
 
 ```bash
@@ -1202,6 +1342,64 @@ rule all:
             )
 ```
 
+And here's the full `Snakefile`
+
+```python
+samples=["sample_1", "sample_2", "sample_3", "sample_4"]
+
+SAMPLES_TWO = config["SAMPLES"]
+DATA_PATH = config["DATA_PATH"]
+GROUPS = config["GROUPS"]
+
+rule all:
+    input:
+        # Create the fourth file for all samples
+        expand(
+            "results/{sample}_fourth_file.txt",
+            sample = samples
+        ),
+        
+        # Create the combined file from file two
+        "results/combined_file.txt",
+        
+        # Create a file using params
+        expand(
+            "results/{sample}_params_ex.txt",
+            sample = samples
+            ),
+        # Create a log file
+        expand(
+            "results/{sample}_log_ex.txt",
+            sample = samples
+            ),
+        # Trying with samples from the config file
+        expand(
+            "results/{sample}_params_ex.txt",
+            sample = SAMPLES_TWO
+        ),
+        # Running python code
+        expand(
+            "results/{sample}_python_code.txt",
+            sample = SAMPLES_TWO
+            ),
+        # Running python script
+        expand(
+            "results/{sample}_python_script.txt",
+            sample = SAMPLES_TWO
+            ),
+        expand(
+            "results/{run_number}/output_{sample}.txt",
+            run_number = "first_run", sample = SAMPLES_TWO
+            )
+
+include: "src/rules/first_rule.snake"
+include: "src/rules/general_rule.snake"
+include: "src/rules/rule_all_ex.snake"
+include: "src/rules/rule_params_ex.snake"
+include: "src/rules/rule_python.snake"
+include: "src/rules/functions.snake"
+```
+
 Now we can try running it
 ```bash
 $ snakemake -np --configfile config.yaml
@@ -1275,6 +1473,72 @@ rule all:
             "results/{run_number}/output_{sample}.txt",
             run_number = "second_run", sample = SAMPLES_TWO
             )
+```
+
+And here's the full `Snakefile`
+
+```python
+samples=["sample_1", "sample_2", "sample_3", "sample_4"]
+
+SAMPLES_TWO = config["SAMPLES"]
+DATA_PATH = config["DATA_PATH"]
+GROUPS = config["GROUPS"]
+
+rule all:
+    input:
+        # Create the fourth file for all samples
+        expand(
+            "results/{sample}_fourth_file.txt",
+            sample = samples
+        ),
+        
+        # Create the combined file from file two
+        "results/combined_file.txt",
+        
+        # Create a file using params
+        expand(
+            "results/{sample}_params_ex.txt",
+            sample = samples
+            ),
+        # Create a log file
+        expand(
+            "results/{sample}_log_ex.txt",
+            sample = samples
+            ),
+        # Trying with samples from the config file
+        expand(
+            "results/{sample}_params_ex.txt",
+            sample = SAMPLES_TWO
+        ),
+        # Running python code
+        expand(
+            "results/{sample}_python_code.txt",
+            sample = SAMPLES_TWO
+            ),
+        # Running python script
+        expand(
+            "results/{sample}_python_script.txt",
+            sample = SAMPLES_TWO
+            ),
+        # Test input functions
+        expand(
+            "results/{run_number}/output_{sample}.txt",
+            run_number = "first_run", sample = SAMPLES_TWO
+            ),
+        expand(
+            "results/{run_number}/output_{sample}.txt",
+            run_number = "second_run", sample = SAMPLES_TWO
+            )
+
+include: "src/rules/first_rule.snake"
+include: "src/rules/general_rule.snake"
+include: "src/rules/rule_all_ex.snake"
+include: "src/rules/first_rule.snake"
+include: "src/rules/general_rule.snake"
+include: "src/rules/rule_all_ex.snake"
+include: "src/rules/rule_params_ex.snake"
+include: "src/rules/rule_python.snake"
+include: "src/rules/functions.snake"
 ```
 
 And we can test again
@@ -1405,71 +1669,6 @@ Here, the input files are different if the data is paired end or not. We don't w
 
 Most importantly, `Snakemake` plays well with servers and can run all of your jobs in parallel. Right now, we are just running all of our jobs one at a time, but if we submit to the server, all samples can be run at the same time. It's pretty simple to do.
 
-First, you need to install drmaa
-```bash
-$ mamba install drmaa
-```
-
-Now we need to add two paramaters to all of our rules.
-
-1. `job_name` The name of the job that apears in the queue
-2. `memory` The amount of memory to give the job.
-
-We also need to add a new argument: `threads`
-
-Below is an example of a rule with the parameters
-```python
-rule submit_example:
-    output:
-        "results/submit_ouput/{sample}_submit.txt"
-    params:
-        sample_list = SAMPLES_TWO,
-        job_name    = "test_jobs_{sample}",
-        memory      = "select[mem>4] rusage[mem=4]"
-    threads:
-        1
-    shell:
-        """
-        echo "completed" > output
-        """
-```
-
-Now, I also have a driver script called `snakecharmer.sh`. Here is what that looks like
-```bash
-#!/usr/bin/env bash
-#BSUB -J RNAseq
-#BSUB -o logs/snakemake_%J.out
-#BSUB -e logs/snakemake_%J.err
-#BSUB -R "select[mem>4] rusage[mem=4] " 
-#BSUB -q rna
-set -o nounset -o pipefail -o errexit -x
-# Load modules
-module load fastqc/0.11.7
-module load samtools/1.5
-module load STAR/2.5.2a
-module load subread
-# LSF arguments
-args=' 
-  -q rna 
-  -o {log}.out 
-  -e {log}.err 
-  -J {params.job_name} 
-  -R "{params.memory} span[hosts=1] " 
-  -n {threads} ' 
-# Run snakemake pipeline
-snakemake \
-    --drmaa "$args" \
-    --snakefile Snakefile \
-    --configfile config.yaml \
-    --jobs 60 \
-    --latency-wait 60 \
-    --rerun-incomplete
-```
-
-To walk through this, there are a few things going on.
-
-First, this is a normal submit script, the `#BSUB` arguments probably look familiar to you
-
 Next, we set shell options, these are especially helpful for exiting if something fails and for printing errors.
 
 * -o nounset
@@ -1483,25 +1682,6 @@ Next, we set shell options, these are especially helpful for exiting if somethin
 
 Then, we load all of the modules we will need (this is pretty unique to each of your pipelines).
 
-Now is the interesting part, the arguments. Here we are tellling the system to use the arguments from snakemake.
-
-1. Logs (`-o` and `-e`)
-    * It will look under the log argument for the base name of the log file. It will then output that name `.err` and `.out` as the output files. I like to organize it so all of my logs are in one `logs` directory and then each rule gets its own directory. Each sample then gets it's own file. If the log does not contain all the same wildcards as the output files, you would not get unique log files for each rule. Because of this, snakemake won't run if the naming isn't unique. The log for my trimming example is `{results}/logs/trimming/cutadapt_{sample}`. Here you see I have multiple subdirectories before finally getting to the file name (based on the sample).
-2. job name (`-J`)
-    * This tells `Snakemake` to find the `job_name` under `params`.
-3. memory (`-R`)
-    * This tells `Snakemake` to find the `memory` under `params`
-4. Threads (`-n`)
-    * This tells `Snakemake` to find the number of threads under the `threads` argument
-
-Finally, the call to snakemake is made. Here `drmaa` provides the arguments listed above to snakemake based on each specific rule. We also provide `Snakemake` with the name of the `snakefile` and `configfile`. These are easy to change if you want to test out different parameters in the `configfile`. The last three arguments are telling snakemake how many jobs to submit (60 in this case), how long to wait to see completed files (60 seconds, this is just to account for any lag associated with submitting jobs), and to rerun any jobs that were not completed. Other arguments that may be helpful include the `--keep-going` argument. This is helpful because if one job fails, by default `Snakemake` won't submit any new jobs. Sometimes this is nice (remember, we can't restart a `Snakemake` run until all jobs have finished), but this is sometimes annoying (like if you left it to run overnight, but one sample failed on step one). If you'd rather `Snakemake` keep submitting jobs even if one failed, you can include the `--keep-going` flag.
-
-Once this file is written, you can easily submit with
-```bash
-$ bsub < snakecharmer.sh
-```
-
-When this happens, there are a few things `Snakemake` will do. It will first check all of the output files listed under `rule_all`. It will then back track through your rules until it finds a rule (upsteam of `rule_all`) where the input files exist. It will now submit that rule for each sample as an individual job. When that job completes for each sample, it will submit the next job. It will keep doing this until it makes all of the output files requested by `rule_all`. Because each sample is now idependent, as each task finishes for the sample, a new one will start. 
 
 ## Some headaches and errors
 1. Can't determine wildcards
